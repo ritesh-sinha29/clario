@@ -2,7 +2,7 @@
 
 > **Clarity today, Success follows tomorrow**
 
-[![Demo Video](https://img.shields.io/badge/Demo-Watch%20Video-red?style=for-the-badge&logo=youtube)](https://youtu.be/09U9jo7paM4?si=jtQDJx4F8rH7mFd-)
+[![Demo Video](https://img.shields.io/badge/Demo-Watch%20Video-red?style=for-the-badge&logo=youtube)]( - )
 [![Live Demo](https://img.shields.io/badge/Live-Demo-blue?style=for-the-badge&logo=vercel)]( - )
 
 An AI-powered career guidance platform that helps students navigate their career journey from confusion to clarity. Built by **Team ROX** for Build with Gemini .
