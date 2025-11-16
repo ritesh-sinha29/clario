@@ -154,8 +154,10 @@ Unlike other platforms that provide isolated solutions, Clario offers:
 ## 💰 Business Model
 
 ### Freemium Model
-- **Free Tier**: 100 credits on sign-up + referral credits
-- **Pro Subscription**: Monthly credits for enhanced features
+- **Free Credits**: 100 credits on sign-up + referral credits
+- **Freemium Model**: User can have access to mentor connect, ai tools for free and some premium tools need subscription
+- **Referral Bonus**: User will also get bonus on inviting their friends to this platform
+- **Pro Subscription**: User can buy 899/ month subscription to have access to our advance modals and Features
 - **Credit System**: Purchase additional credits as needed
 
 ### Revenue Streams
