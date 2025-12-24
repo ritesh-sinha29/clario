@@ -83,14 +83,8 @@ export default function RoomPage({ params }: { params: RoomParams }) {
 
     const initializeRoom = async () => {
       try {
-        setConnecting(true);
-
         // REQUEST PERMISSIONS FIRST (before anything else)
         console.log("🔐 REQUESTING PERMISSIONS IMMEDIATELY...");
-        toast.loading("🎤 Requesting camera & microphone access...", { 
-          duration: 5000,
-          id: "permission-toast" 
-        });
         
         let stream: MediaStream;
         try {
@@ -100,10 +94,8 @@ export default function RoomPage({ params }: { params: RoomParams }) {
             audio: { echoCancellation: true, noiseSuppression: true },
           });
           console.log("✅ PERMISSIONS GRANTED IMMEDIATELY!");
-          toast.dismiss("permission-toast");
         } catch (mediaError: any) {
           console.error("❌ Permission denied or device error:", mediaError.name);
-          toast.dismiss("permission-toast");
           
           let errorMsg = "Failed to access camera/microphone";
           if (mediaError.name === "NotAllowedError") {
@@ -202,14 +194,11 @@ export default function RoomPage({ params }: { params: RoomParams }) {
         subscribeToTypingStatus();
 
         setJoined(true);
-        setConnecting(false);
-        toast.success("✓ Connected to room");
         
         console.log("✅ Room initialized!");
       } catch (error) {
         console.error("❌ Init error:", error);
         toast.error("Failed to initialize room");
-        setConnecting(false);
       }
     };
 
@@ -486,8 +475,6 @@ export default function RoomPage({ params }: { params: RoomParams }) {
         {/* Header */}
         <div className="mb-4">
           <h1 className="text-2xl font-bold">Room: {roomId}</h1>
-          {connecting && <p className="text-sm text-yellow-500">Connecting...</p>}
-          {joined && <p className="text-sm text-green-500">Connected ✓</p>}
         </div>
 
         {/* Video Container */}
@@ -500,14 +487,7 @@ export default function RoomPage({ params }: { params: RoomParams }) {
             className="w-full h-full object-cover bg-black"
           />
           
-          {!joined && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-              <div className="text-center">
-                <div className="animate-spin mb-4">🔄</div>
-                <p className="text-white">Connecting to camera...</p>
-              </div>
-            </div>
-          )}
+
 
           {/* Local Video (Picture in Picture) */}
           {localStreamRef.current && (
@@ -540,7 +520,7 @@ export default function RoomPage({ params }: { params: RoomParams }) {
                   ? "bg-blue-600 hover:bg-blue-700"
                   : "bg-red-600 hover:bg-red-700"
               }`}
-              title={!localStreamRef.current ? "Connecting..." : isAudioEnabled ? "Mute" : "Unmute"}
+              title={isAudioEnabled ? "Mute" : "Unmute"}
             >
               {isAudioEnabled ? <FaMicrophone /> : <FaMicrophoneSlash />}
             </button>
@@ -554,7 +534,7 @@ export default function RoomPage({ params }: { params: RoomParams }) {
                   ? "bg-blue-600 hover:bg-blue-700"
                   : "bg-red-600 hover:bg-red-700"
               }`}
-              title={!localStreamRef.current ? "Connecting..." : isVideoEnabled ? "Stop Camera" : "Start Camera"}
+              title={isVideoEnabled ? "Stop Camera" : "Start Camera"}
             >
               {isVideoEnabled ? <FaVideo /> : <FaVideoSlash />}
             </button>
