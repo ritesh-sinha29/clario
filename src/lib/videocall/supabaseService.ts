@@ -102,10 +102,14 @@ export class SupabaseService {
    * Get signals for a room
    */
   static async getSignals(roomId: string): Promise<Signal[]> {
+    // Only get signals from the last 2 minutes to avoid processing stale candidates
+    const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString();
+
     const { data, error } = await supabase
       .from('signals')
       .select('*')
       .eq('room_id', roomId)
+      .gte('created_at', twoMinutesAgo)
       .order('created_at', { ascending: true });
 
     if (error) throw new Error(`Failed to fetch signals: ${error.message}`);

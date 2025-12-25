@@ -33,8 +33,12 @@ export default function RoomPage() {
     userId,
     localStream,
     remoteStream,
-    isLoading
-  } = useVideoCall();
+    isLoading,
+    connectionState // Get connection state
+  } = useVideoCall({
+    mentorId: 'mentor-123', // Hardcoded for demo
+    durationMinutes: 60
+  });
 
   // UI State
   const [showChat, setShowChat] = useState(true);
@@ -276,7 +280,15 @@ export default function RoomPage() {
             <div>
               <h1 className="font-raleway text-white font-semibold text-lg">Clario Session</h1>
               <p className="text-gray-400 text-sm font-inter">
-                {formatDuration(callDuration)} • {localStream ? "In Call" : "Connecting..."}
+                {formatDuration(callDuration)} •
+                <span className={`ml-2 px-2 py-0.5 rounded text-xs font-semibold ${connectionState === 'connected' || connectionState === 'completed'
+                  ? 'bg-green-500/20 text-green-400'
+                  : connectionState === 'failed' || connectionState === 'disconnected'
+                    ? 'bg-red-500/20 text-red-400'
+                    : 'bg-yellow-500/20 text-yellow-400'
+                  }`}>
+                  {connectionState === 'new' ? 'Initializing...' : connectionState}
+                </span>
               </p>
             </div>
           </div>
@@ -301,20 +313,41 @@ export default function RoomPage() {
             autoPlay
             playsInline
             className="absolute inset-0 w-full h-full object-cover"
+            onLoadedMetadata={(e) => {
+              // Ensure audio is enabled
+              e.currentTarget.muted = false;
+              e.currentTarget.volume = 1.0;
+            }}
+            onPlay={() => setIsRemoteVideoPlaying(true)}
+            onPause={() => setIsRemoteVideoPlaying(false)}
           />
 
+          {/* Autoplay Blocked / Click to Play Overlay */}
+          {remoteStream && !isRemoteVideoPlaying && (
+            <div className="absolute inset-0 flex items-center justify-center z-10 bg-black/50 backdrop-blur-sm">
+              <button
+                onClick={() => {
+                  if (remoteVideoRef.current) {
+                    remoteVideoRef.current.play();
+                    remoteVideoRef.current.muted = false;
+                  }
+                }}
+                className="flex flex-col items-center gap-3 px-6 py-4 bg-[#0E72ED] hover:bg-[#1976D2] text-white rounded-2xl transition-all shadow-xl hover:scale-105"
+              >
+                <FaVideo className="text-2xl animate-pulse" />
+                <span className="font-semibold">Click to Start Video & Audio</span>
+              </button>
+            </div>
+          )}
+
           {/* Waiting for Remote Video */}
-          {!remoteStream && !isRemoteVideoPlaying && (
+          {!remoteStream && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#232633]">
-              <div className="w-24 h-24 rounded-full bg-[#3D4150] flex items-center justify-center mb-4">
-                <FaUserCircle className="text-5xl text-gray-500" />
+              <div className="w-24 h-24 rounded-full bg-[#2C3040] flex items-center justify-center mb-4 animate-pulse">
+                <FaVideoSlash className="text-gray-500 text-3xl" />
               </div>
-              <p className="text-gray-400 font-inter text-center font-medium">
-                Connecting to other participant...
-              </p>
-              <p className="text-gray-500 text-sm mt-2 font-inter">
-                Their video will appear here
-              </p>
+              <p className="text-gray-400 font-medium">Waiting for participant...</p>
+              <p className="text-xs text-gray-500 mt-2">Share the link to invite</p>
             </div>
           )}
 

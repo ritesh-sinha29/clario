@@ -165,11 +165,17 @@ export const useVideoCall = ({ mentorId, durationMinutes }: UseVideoCallProps = 
       subscriptionRef.current = subscription;
 
       // 4. Check for existing offer (if we are joining)
-      // If we are the first one, we create an offer.
+      // Get signals (already filtered to last 2 mins by service)
       const signals = await SupabaseService.getSignals(currentRoomId);
-      const existingOffer = signals.find(s => s.signal_type === 'offer');
 
-      if (!existingOffer) {
+      // Find the LATEST offer
+      const offers = signals.filter(s => s.signal_type === 'offer');
+      // Sort by created_at desc to get latest first
+      offers.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+      const latestOffer = offers[0];
+
+      if (!latestOffer) {
         // No offer found, so we create one (we are the caller)
         console.log("📞 No offer found, creating offer...");
         const offer = await webrtc.createOffer();
@@ -180,11 +186,12 @@ export const useVideoCall = ({ mentorId, durationMinutes }: UseVideoCallProps = 
           signal_data: offer,
         });
         console.log("📞 Offer created and sent!");
-      } else if (existingOffer.sender_id !== currentUserId) {
+      } else if (latestOffer.sender_id !== currentUserId) {
         // Offer exists from someone else (we are the callee), process it
-        console.log("📞 Found existing offer from other user, processing...");
-        // createAnswer will setRemoteDescription internally
-        const answer = await webrtc.createAnswer(existingOffer.signal_data);
+        console.log(`📞 Found latest offer from ${latestOffer.sender_id} (${latestOffer.created_at})`);
+
+        // Process the latest offer
+        const answer = await webrtc.createAnswer(latestOffer.signal_data);
         await SupabaseService.storeSignal({
           room_id: currentRoomId,
           sender_id: currentUserId,
@@ -193,16 +200,21 @@ export const useVideoCall = ({ mentorId, durationMinutes }: UseVideoCallProps = 
         });
         console.log("📞 Answer sent!");
 
-        // Process any existing ICE candidates from remote
-        const remoteIce = signals.filter(s => s.signal_type === 'ice' && s.sender_id !== currentUserId);
-        console.log("🧊 Processing", remoteIce.length, "existing ICE candidates");
-        for (const ice of remoteIce) {
+        // Process ONLY ICE candidates that came AFTER the latest offer
+        const offerTime = new Date(latestOffer.created_at).getTime();
+        const relevantIce = signals.filter(s =>
+          s.signal_type === 'ice' &&
+          s.sender_id !== currentUserId &&
+          new Date(s.created_at).getTime() >= offerTime
+        );
+
+        console.log(`🧊 Processing ${relevantIce.length} relevant ICE candidates (filtered from ${signals.length})`);
+        for (const ice of relevantIce) {
           await webrtc.addIceCandidate(ice.signal_data);
         }
       } else {
-        console.log("📞 Found our own offer, waiting for answer...");
+        console.log("📞 Found our own latest offer, waiting for answer...");
       }
-
     } catch (err) {
       console.error('Initialization error:', err);
       throw err;
