@@ -3,14 +3,15 @@ import { Storage } from "@google-cloud/storage";
 import { createClient } from "@/lib/supabase/client";
 import { embedText } from "@/lib/functions/embedding";
 
-const storage = new Storage({
-  projectId: process.env.GCP_PROJECT_ID,
-  credentials: JSON.parse(process.env.GCP_SERVICE_ACCOUNT_KEY!),
-});
-
-const BUCKET = process.env.GCS_BUCKET!;
 
 export async function GET() {
+  const storage = new Storage({
+    projectId: process.env.GCP_PROJECT_ID,
+    credentials: JSON.parse(process.env.GCP_SERVICE_ACCOUNT_KEY!),
+  });
+
+  const BUCKET = process.env.GCS_BUCKET!;
+
   const supabase = createClient();
 
   const { data: mentors, error } = await supabase
