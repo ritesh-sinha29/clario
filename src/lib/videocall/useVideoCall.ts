@@ -377,8 +377,18 @@ export const useVideoCall = ({ mentorId, durationMinutes }: UseVideoCallProps = 
           await videoSender.replaceTrack(screenTrack);
         } else {
           // No video track - add screen track as new
-          console.log("📺 Adding screen as new track");
+          console.log("📺 Adding screen as new track (Renegotiation needed)");
           pc.addTrack(screenTrack, screenStream);
+
+          // Renegotiate (Create new offer)
+          const offer = await webrtcServiceRef.current.createOffer();
+          await SupabaseService.storeSignal({
+            room_id: roomId,
+            sender_id: userId,
+            signal_type: 'offer',
+            signal_data: offer,
+          });
+          console.log("📺 Screen share offer sent!");
         }
 
         setIsScreenSharing(true);
