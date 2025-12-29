@@ -100,7 +100,7 @@ export function AppSidebar() {
             className=""
           />
           <h2 className="font-bold -ml-1 font-sora tracking-tight text-2xl text-white">
-            Clario
+            Clarioo
           </h2>
         </div>
         <div className="flex items-center text-gray-300 text-sm font-sora gap-3 justify-center">
