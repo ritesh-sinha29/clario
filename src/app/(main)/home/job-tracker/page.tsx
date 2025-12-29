@@ -647,7 +647,7 @@ const JobTracker = () => {
       <Dialog open={prepOpen} onOpenChange={setPrepOpen}>
         <VisuallyHidden>
           <DialogTitle>
-            Clario is Creating Environment for Interview.
+            Clarioo is Creating Environment for Interview.
           </DialogTitle>
         </VisuallyHidden>
         <DialogContent className="sm:max-w-[750px] h-[500px] p-0 border-0 shadow-2xl rounded-lg overflow-hidden bg-transparent">

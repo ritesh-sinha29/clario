@@ -19,7 +19,7 @@ const NavbarWeb = () => {
           />
         </Link>
 
-        <h1 className="font-raleway text-3xl font-bold -ml-2">Clario</h1>
+        <h1 className="font-raleway text-3xl font-bold -ml-2">Clarioo</h1>
       </div>
 
       {/* NAV LINKS */}

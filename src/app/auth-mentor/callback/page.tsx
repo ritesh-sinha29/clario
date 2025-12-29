@@ -79,7 +79,7 @@ const MentorCallback = () => {
               className=""
             />
             <h1 className="font-raleway text-3xl font-bold text-white">
-              Clario
+              Clarioo
             </h1>
           </div>
         </div>

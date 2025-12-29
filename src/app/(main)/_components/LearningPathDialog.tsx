@@ -37,7 +37,7 @@ export function LearningPathDialog({ showDialog, setShowDialog, loadingStep }: L
   return (
     <Dialog open={showDialog} onOpenChange={setShowDialog}>
       <VisuallyHidden>
-        <DialogTitle>Clario is Creating Your Personalized Learning Path</DialogTitle>
+        <DialogTitle>Clarioo is Creating Your Personalized Learning Path</DialogTitle>
       </VisuallyHidden>
 
       <DialogContent className="sm:max-w-[800px] bg-white text-center font-inter p-0 h-[520px] overflow-hidden">
@@ -49,7 +49,7 @@ export function LearningPathDialog({ showDialog, setShowDialog, loadingStep }: L
             </h2>
             <Image
               src="/9.png"
-              alt="Clario"
+              alt="Clarioo"
               width={800}
               height={800}
               className="absolute object-contain -bottom-5 left-0 scale-125"
@@ -61,7 +61,7 @@ export function LearningPathDialog({ showDialog, setShowDialog, loadingStep }: L
             {/* Header */}
             <div>
               <h1 className="text-center font-semibold font-inter text-2xl text-gray-900 mb-2">
-                Clario is Creating Your
+                Clarioo is Creating Your
               </h1>
               <p className="text-center font-inter text-sm text-indigo-600 font-medium">Personalized Learning Path</p>
             </div>

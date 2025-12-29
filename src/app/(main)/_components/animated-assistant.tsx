@@ -102,7 +102,7 @@ export default function AnimatedAssistant() {
                   className=""
                 />
                 <h2 className="font-bold -ml-1 font-sora tracking-tight text-2xl text-white">
-                  Clario
+                  Clarioo
                 </h2>
               </div>
             </SheetTitle>
@@ -112,10 +112,10 @@ export default function AnimatedAssistant() {
           </SheetHeader>
           <div className="grid grid-cols-2 gap-4 px-2 mt-5">
               <div className="p-2 rounded-sm bg-blue-200 border-2 cursor-none border-blue-600 text-black font-sora text-xs tracking-tight text-center hover:bg-blue-200 hover:scale-105 transition-all duration-200">
-                <p>Getting started with Clario</p>
+                <p>Getting started with Clarioo</p>
               </div>
               <div className="p-2 rounded-sm bg-blue-200 border-2 border-blue-500 text-black font-sora text-xs tracking-tight text-center hover:bg-blue-200 hover:scale-105 transition-all duration-200">
-                <p>Get To know more about Clario</p>
+                <p>Get To know more about Clarioo</p>
               </div>
               <div className="p-2 rounded-sm bg-blue-200 border-2 border-blue-500 text-black font-sora text-xs tracking-tight text-center hover:bg-blue-200 hover:scale-105 transition-all duration-200">
                 <p>Creating Tickets to solve complex quiries</p>

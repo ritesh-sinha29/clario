@@ -27,7 +27,7 @@ export default function EmailVerified() {
             className=""
           />
           <h2 className="font-bold -ml-1 font-sora tracking-tight text-3xl">
-            Clario
+            Clarioo
           </h2>
         </div>
       </div>

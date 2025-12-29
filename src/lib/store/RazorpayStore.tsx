@@ -65,7 +65,7 @@ export const useRazorpayStore = create<RazorpayStore>((set, get) => ({
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
         amount: orderData.amount,
         currency: orderData.currency,
-        name: "Clario",
+        name: "Clarioo",
         description: "Clarity Today , Success Tomorrow",
         order_id: orderData.orderId,
         handler: async (response) => {

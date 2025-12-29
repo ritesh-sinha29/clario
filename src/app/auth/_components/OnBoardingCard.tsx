@@ -418,10 +418,10 @@ export function OnboardingCard() {
               <div className="flex gap-3 w-full">
                 <div className="space-y-1 w-full">
                   <div className="font-medium font-inter text-center">
-                    Where did you find Clario?
+                    Where did you find Clarioo?
                   </div>
                   <p className="text-sm text-muted-foreground text-center font-inter">
-                    Tell us how you found out about Clario
+                    Tell us how you found out about Clarioo
                   </p>
                 </div>
               </div>

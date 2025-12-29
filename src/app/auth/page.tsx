@@ -247,7 +247,7 @@ export default function AuthPage() {
           <div className="absolute inset-0 ">
             <Image
               src="/clarioWhite.png"
-              alt="Clario"
+              alt="Clarioo"
               width={100}
               height={100}
               className="absolute top-[32%] left-1/2 -translate-x-1/2 -translate-y-1/2"

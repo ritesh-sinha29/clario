@@ -273,7 +273,7 @@ export default function RoomPage() {
               <FaVideo className="text-white text-sm" />
             </div>
             <div>
-              <h1 className="font-raleway text-white font-semibold text-lg">Clario Session</h1>
+              <h1 className="font-raleway text-white font-semibold text-lg">Clarioo Session</h1>
               <p className="text-gray-400 text-sm font-inter">
                 {formatDuration(callDuration)} •
                 <span className={`ml-2 px-2 py-0.5 rounded text-xs font-semibold ${connectionState === 'connected' || connectionState === 'completed'

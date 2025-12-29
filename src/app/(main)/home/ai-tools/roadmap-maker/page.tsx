@@ -443,7 +443,7 @@ const RoadmapMaker = () => {
                 <div className="flex items-center gap-3 mb-6">
                   <h2 className="text-2xl font-medium text-black font-inter tracking-wide">
                     Hang tight,{" "}
-                    <span className="font-semibold text-blue-600">Clario</span>{" "}
+                    <span className="font-semibold text-blue-600">Clarioo</span>{" "}
                     is designing your personalised roadmap
                   </h2>
 

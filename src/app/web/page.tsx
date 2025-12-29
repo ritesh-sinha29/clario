@@ -18,7 +18,7 @@ const Webpage = () => {
       <NavbarWeb />
       {/* Hero page */}
       <main className="flex flex-col items-center justify-center sm:mt-14 mt-10  h-full w-full relative">
-        {/* Introducing Clario */}
+        {/* Introducing Clarioo */}
         <div className="z-10 flex  items-center justify-center">
           <div
             className={cn(
@@ -26,7 +26,7 @@ const Webpage = () => {
             )}
           >
             <AnimatedShinyText className="inline-flex items-center justify-center px-4 py-1 transition ease-out text-muted-foreground font-inter hover:text-neutral-600 hover:duration-300 tracking-wide font-extralight">
-              <span>✨ Introducing Clario</span>
+              <span>✨ Introducing Clarioo</span>
               <LuChevronRight className="ml-1 size-3 transition-transform duration-300 ease-in-out group-hover:translate-x-0.5" />
             </AnimatedShinyText>
           </div>
@@ -79,7 +79,7 @@ const Webpage = () => {
 
         {/* Secondary text */}
         <p className="max-w-[700px] mx-auto text-center font-inter text-muted-foreground text-xl my-3">
-          Get clear about your path, and confident in your next step. Clario
+          Get clear about your path, and confident in your next step. Clarioo
           helps you learn, plan, and grow your career with purpose.
         </p>
 
