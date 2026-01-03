@@ -6,7 +6,8 @@
 [![Demo Video](https://img.shields.io/badge/Demo-Watch%20Video-red?style=for-the-badge&logo=youtube)](https://www.youtube.com/watch?v=zAU65GELeRU)
 [![Live Demo](https://img.shields.io/badge/Live-Demo-blue?style=for-the-badge&logo=vercel)](-)
 
-An AI-powered career guidance platform that helps students navigate their career journey from confusion to clarity. Built by **Team ROX** for Build with Gemini .
+India’s first smart career platform that has fundamentally transformed how students choose their careers — a 3× National Award winner and a Google-recognized winning project.
+With real time Agent , Voice Agent , 3D Roadmaps , College suggestions and best part Mentor connect with 1:1 video call this is changing game. One of the Best product ever seen by -  MAHESH CHAND (founder of C# corner) !!!
 
 <div align="center">
   
