@@ -1,337 +1,102 @@
-
-# 🎯🎓 Clarioo - One Stop Career Platform
-
-> **Clarity today, Success follows tomorrow**
-
-[![Demo Video](https://img.shields.io/badge/Demo-Watch%20Video-red?style=for-the-badge&logo=youtube)]( - )
-[![Live Demo](https://img.shields.io/badge/Live-Demo-blue?style=for-the-badge&logo=vercel)](clarioo.live)
-
-India’s first smart career platform that has fundamentally transformed how students choose their careers — a 3× National Award winner and a Google-recognized winning project.
-With real time Agent , Voice Agent , 3D Roadmaps , College suggestions and best part Mentor connect with 1:1 video call this is changing game. One of the Best product ever seen by -  MAHESH CHAND (founder of C# corner) !!!
+# 🚀 Clario Career Platform
 
 <div align="center">
-  
-[![Watch Demo Video](https://img.shields.io/badge/Demo-Click%20here%20to%20Watch%20Video-red?style=for-the-badge&logo=youtube)](-)
+  <h3>Your AI-Powered Career Compass 🧭</h3>
+  <p>Revolutionizing career guidance with 3D roadmaps, personalized AI agents, and real-time mentorship.</p>
 
-  <div align="center"> 
-  <img src="public/Loginpage.png" alt="Login Page" width="600">
-  <div align="left">
-
-## 🚀 Problem Statement
-
-Today, **10.4%** of Indian students receive formal career guidance, while most youth report career confusion due to unclear paths and generic advice _(Bharat Career Aspirations Report 2025 by UNICEF)_.
-
-Students face four critical challenges:
-
-- **🤔 Career Confusion**: Lost choosing careers that fit their skills and passions
-- **📚 Lack of Awareness**: Limited knowledge of real opportunities, colleges, and courses
-- **🤝 Limited Guidance & Network**: Missing mentors and strong professional networks
-- **💡 Interest-Driven Gap**: Careers fail when choices aren't aligned with personal interests
+  [**Live Demo**](https://www.clarioo.live/auth) | [**Report Bug**](https://github.com/ronitrai27/clario-career_platform/issues) | [**Request Feature**](https://github.com/ronitrai27/clario-career_platform/issues)
+</div>
 
 ---
 
-## 💡 Our Solution
+## 🌟 Introduction
 
-**Clarioo** is an AI-powered platform that guides students with clear career roadmaps and essential tools, aligning with:
+**Clario** is a comprehensive career development platform designed to guide students and professionals through their career journey. By leveraging cutting-edge **AI**, **3D visualization**, and **real-time communication**, Clario bridges the gap between ambition and reality. Whether you're deciding on a major, preparing for interviews, or seeking 1:1 mentorship, Clario's intelligent agents and immersive tools are here to help.
 
-- **UN SDG 4**: Quality Education
-- **UN SDG 8**: Decent Work & Economic Growth
+## ✨ Key Features
 
-From a personalized platform to career guidance to making them job ready
-everything in one platform !
+### 🗺️ Immersive 3D Career Roadmaps
+Visualize your career path potential like never before. Our interactive **3D Roadmaps** (powered by Three.js & Spline) create an engaging way to explore different execution strategies and milestones for your chosen field.
 
-It all starts with quiz ! - to mentor connect (industry experts) - to personalised roadmaps --- to jobs/courses -- to interview prep making them market ready !
+### 🛣️ AI-Personalized Learning Tracks
+Forget generic advice. Clario's AI analyzes your profile, skills, and goals to generate **customized learning tracks**. Step-by-step guidance ensures you learn exactly what you need to succeed.
 
-### Core Features
+### 🤖 Voice AI Mock Interviews
+Practice makes perfect. Our realistic **Voice Agents** (powered by Vapi AI) conduct mock interviews, providing real-time feedback on your responses, tone, and confidence to get you job-ready.
 
-#### 1. 🤖 AI Career Coach & Voice Assistants
+### 🧠 Intelligent Career Agents
+Unsure which path to take? Our **AI Career Agents** (powered by Google Gemini & LangChain) act as your personal counselors. Chat with them to decode your interests, discover suitable colleges, and identify high-growth career opportunities.
 
-- Personalized career guidance powered by **Google Gemini 2.5 Flash**
-- Real-time conversational AI with database read/write access
-- Voice-enabled assistance for seamless interaction
+### 🎓 Smart College Suggestions
+Data-driven recommendations to help you find the best educational institutions that align with your career aspirations and academic profile.
 
-#### 2. 🗺️ 3D AI Roadmaps
+### 📹 1:1 Mentor Connect
+Connect directly with industry experts. Our integrated **Video Call** feature (powered by ZegoCloud) facilitates seamless mock interviews, guidance sessions, and networking with mentors worldwide.
 
-- Interactive drag-and-drop customizable roadmaps
-- Curated learning resources at every step
-- Visual progress tracking
+## 🛠️ Tech Stack
 
-#### 3. 👨‍🏫 Mentor Connect & Peer Network
+**Frontend & UI**
+- **Framework:** Next.js 16 (on Turbopack)
+- **Styling:** Tailwind CSS v4, Framer Motion, Styled Components
+- **UI Components:** Radix UI, Lucide React, Hetero UI
+- **3D Graphics:** react flow
 
-- 1:1 video calls with industry experts (WebRTC)
-- Real-time peer messaging
-- Expert guidance for real-world insights
+**AI & Intelligence**
+- **LLMs:** Google Gemini (via Google GenAI & LangChain)
+- **Voice AI:** Vapi AI
+- **Frameworks:** LangChain (Google, Groq)
+- **Vector DB:** Pinecone
+- **Search Agents:** Tavily, SerpApi, NewsAPI
 
-#### 4. 🎯 Career Explorer
-
-- Discover nearby colleges with placement data
-- Personalized quiz for career recommendations
-- Latest job listings and course recommendations
-
-#### 5. 🎤 AI Interview Preparation
-
-- AI-powered mock interviews
-- Resume builder and analyzer
-- Market-ready preparation tools
-
-#### 6. 📊 Industry Insights & Resources
-
-- Real-time web scraping for latest opportunities
-- Course certifications tracking
-- Google Calendar sync for task management
-
----
-
-## 🏗️ Tech Stack
-
-### Frontend
-
-- **Next.js** - React framework
-- **TypeScript** - Type safety
-- **Tailwind CSS** - Styling
-- **Shadcn UI** - Component library
-- **Framer Motion** - Animations
-
-### Backend
-
-- **Node.js** - Runtime environment
-- **Supabase** - Database & Authentication
-- **PostgreSQL** - Primary database
-- **Redis/Upstash** - Caching layer
-
-### AI & Machine Learning
-
-- **Google Gemini 2.5 Flash** - Primary AI model
-- **LangChain** - AI orchestration
-- **Groq** - Fast inference
-- **Pinecone** - Vector database
-- **Hugging Face** - NLP models
-- **Tavily/SerpAPI** - Web scraping
-
-### APIs & Services
-
-- **Google API** - Calendar integration
-- **Discord API** - Community features
-- **Slack API** - Notifications
-- **Tavily** - Web search
-- **SerpAPI** - Search data
-- **ImageKit.io** - Image optimization
-
-### Real-time Features
-
-- **WebRTC** - Video calling
-- **Socket.io** - Real-time messaging
-- **Stream** - Chat infrastructure
-
-### Deployment & Tools
-
-- **Vercel** - Hosting platform
-- **GitHub** - Version control
-- **Postman** - API testing
-
----
-
-## 🎨 Key Highlights
-
-### Why Clarioo is Different
-
-Unlike other platforms that provide isolated solutions, Clarioo offers:
-
-✅ **Complete Career Ecosystem** - Everything in one place  
-✅ **AI-Powered Personalization** - Dynamic, up-to-date advice  
-✅ **Real-World Networking** - Connect with mentors and peers  
-✅ **Interactive Learning** - 3D roadmaps with curated resources  
-✅ **Market-Ready Tools** - Interview prep, resume building, job tracking
-
-### Competitive Advantage
-
-- **20%** less monthly charges than existing platforms
-- **30%** increase in college adoption
-- **90%** usefulness rating from early users
-
----
-
-## 📈 Impact & Benefits
-
-### Social Impact
-
-| Impact Area                 | Description                                                        |
-| --------------------------- | ------------------------------------------------------------------ |
-| 🎯 **Reduce Confusion**     | Help students discover careers matching their interests and skills |
-| 📚 **Avoid Dropouts**       | Guide 10th-12th students early, keeping them motivated             |
-| 💼 **Boost Employability**  | Equip students with right skills, courses, and mentorship          |
-| 🌐 **Increase Awareness**   | Provide real-time insights on careers and opportunities            |
-| 🌍 **Bridge Education Gap** | Promote equal access to quality guidance for all learners          |
-
-### Target Goals
-
-- Reduce career confusion for **10L+ students** in Tier-2/3 cities by 2026
-- Partner with **100+ schools/mentors** in 12 months
-- Increase employability through personalized skilling
-
----
-
-## 💰 Business Model
-
-### Freemium Model
-
-- **Free Credits**: 100 credits on sign-up + referral credits
-- **Freemium Model**: User can have access to mentor connect, ai tools for free and some premium tools need subscription
-- **Referral Bonus**: User will also get bonus on inviting their friends to this platform
-- **Pro Subscription**: User can buy 899/ month subscription to have access to our advance modals and Features
-- **Credit System**: Purchase additional credits as needed
-
-### Revenue Streams
-
-| Stream               | Type | Scalability |
-| -------------------- | ---- | ----------- |
-| Credit Packs         | B2C  | High        |
-| Pro Subscription     | B2C  | Medium      |
-| Mentor Commission    | B2C  | Medium      |
-| College Partnerships | B2B  | High        |
-
-### Market Opportunity
-
-- India's EdTech market: **$7.5B** (2024) → **$29B** (2030)
-- Global career counselling market: **$2.67B** (2023) → **$4.55B** (2031)
-- **93%** of Indian students aware of only ~7 career options despite hundreds available
-
----
+**Backend & Services**
+- **Database & Auth:** Supabase
+- **Storage:** Google Cloud Storage, ImageKit, Upstash Redis
+- **Real-time Video:** ZegoCloud
+- **Payments:** Razorpay
 
 ## 🚀 Getting Started
+
+Follow these instructions to set up the project locally.
+
+### Prerequisites
+- Node.js (v18+ recommended)
+- pnpm (or npm/yarn)
 
 ### Installation
 
 1. **Clone the repository**
-
-```bash
-git clone https://github.com/ritesh-sinha29/clarioo
-cd clarioo
-```
+   ```bash
+   git clone https://github.com/ronitrai27/clario-career_platform.git
+   cd clario-career_platform
+   ```
 
 2. **Install dependencies**
+   ```bash
+   pnpm install
+   ```
 
-```bash
-pnpm install
-```
+3. **Set up Environment Variables**
+   Create a `.env.local` file in the root directory and add the necessary API keys.
+   *(Refer to `.env.example` if available)*
 
-3. **Set up environment variables**
 
-```bash
-cp .env.example .env.local
-```
+4. **Run the Development Server**
+   ```bash
+   pnpm dev
+   ```
 
-4. **Run the development server**
-
-```bash
-pnpm install
-pnpm dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-### Build for Production
-
-```bash
-pnpm build
-pnpm start
-```
-
----
-
-## 📱 User Journey
-
-```mermaid
-graph LR
-A[Onboarding + Quiz] --> B[Choose Career with AI Coach]
-B --> C[Get 3D Roadmap]
-C --> D[Mentor Support]
-D --> E[Industry Insights]
-E --> F[Job/Resources]
-F --> G[Interview Prep]
-G --> H[Market Ready]
-```
-
----
-
-## 🎯 Roadmap
-
-### Phase 1 (Completed)
-
-- ✅ MVP Development
-- ✅ AI Career Coach with Gemini integration
-- ✅ 3D Roadmap builder
-- ✅ Mentor connect system
-- ✅ Web and mobile versions
-
-### Phase 2 (Current - 30-90 Days)
-
-- 🔄 User experience refinement
-- 🔄 Partnership with colleges and Mentors
-- 🔄 Expand to 10th-grade students
-- 🔄 Enhanced personalization features
-
-### Phase 3 (Future)
-
-- 📅 College partnerships expansion
-- 📅 EdTech platform integrations
-- 📅 Multilingual support
-- 📅 Global rollout
-
----
-
-## 👥 Team ROX
-
-| Name              | Role                       | College                                   |
-| ----------------- | -------------------------- | ----------------------------------------- |
-| **Ritesh Sinha**  | FullStack Dev & Researcher | SSAIET, Navsari (CSE 2nd Year)            |
-| **Ronit Rai**     | FullStack Developer        | LPU (CSE 2nd Year)                        |
-| **Riya**          | UI/UX & R&D                | LPU (CSE 2nd Year)                        |
-| **Harsh**         | Developer                  | LPU (CSE 2nd Year)                        |
-| **Ayushi Rajput** | Fullstack Developer        | Tula's Institute, Dehradun (CSE 2nd Year) |
-
----
-
+   Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 ## 🤝 Contributing
 
-We welcome contributions! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
----
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## 📞 Contact & Support
-
-- **Website**: developing
-- **Demo Video**: [Watch on YouTube]( - )
-- **Email**: ssaiet.ritesh@gmail.com 
-
----
-
-## 🙏 Acknowledgments
-
-- Google Gemini for AI capabilities
-- UNICEF for research data
+This project is licensed under the MIT License.
 
 ---
 
 <div align="center">
-
-**Made with ❤️ by Team ROX**
-
-_Transforming career confusion into clarity_
-
-[![GitHub Stars](https://img.shields.io/github/stars/ritesh-sinha29/clario-ai-powered-career-platform?style=social)](https://github.com/ritesh-sinha29/clarioo)
-
+  <p>Made with ❤️ for the Hackathon BY ROX.</p>
 </div>

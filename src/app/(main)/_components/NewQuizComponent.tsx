@@ -232,7 +232,7 @@ export default function Quiz() {
                 Did you know? 🤔
               </h3>
               <p className="text-bl font-inter text-base leading-relaxed">
-                Clarioo helps{" "}
+                Clario helps{" "}
                 <span className="font-semibold text-indigo-600">
                   300+ students
                 </span>{" "}
@@ -320,7 +320,7 @@ export default function Quiz() {
               <div className="flex items-center gap-3">
                 <img
                   src="https://i.pravatar.cc/50"
-                  alt="Clarioo Logo"
+                  alt="Clario Logo"
                   className="w-10 h-10 rounded-full"
                 />
                 <div>
@@ -328,14 +328,14 @@ export default function Quiz() {
                     Anonymous
                   </h2>
                   <p className="text-sm text-gray-600 font-raleway">
-                    @ClariooCareer
+                    @ClarioCareer
                   </p>
                 </div>
               </div>
 
               {/* Tweet Content */}
               <p className="text-black font-inter text-base leading-snug">
-                🚀 Clarioo is a wonderful platform to enhance your career and
+                🚀 Clario is a wonderful platform to enhance your career and
                 clear all doubts with the right guidance.
               </p>
 

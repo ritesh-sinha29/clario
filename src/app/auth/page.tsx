@@ -106,7 +106,14 @@ export default function AuthPage() {
                 />
               </Link>
 
-              <h1 className="font-raleway text-3xl font-bold">Clarioo</h1>
+              <h1 className="font-raleway text-3xl font-bold">Clario</h1>
+            </div>
+            <div className="flex items-center">
+              <hr className="w-[40px]" />
+              <p className="text-center mb-6 text-sm font-inter whitespace-nowrap">
+                Continue using Clario with your favorite provider{" "}
+              </p>
+              <hr className="w-[40px]" />
             </div>
             <div className="flex flex-col gap-3">
               <Button
@@ -150,16 +157,16 @@ export default function AuthPage() {
               </Button>
             </div>
             {/* ---- */}
-            <p className="font-inter text-base font-light my-7">
+            {/* <p className="font-inter text-base font-light my-7">
               {" "}
               or continue with{" "}
               <span className="font-medium font-raleway  text-blue-500  ml-4">
                 {isSignup ? "Creating Account" : "Logging In"}
               </span>
-            </p>
+            </p> */}
 
             <div className="flex flex-col gap-5 w-full max-w-[320px] mx-auto">
-              <div className="flex items-center justify-center gap-2 ">
+              {/* <div className="flex items-center justify-center gap-2 ">
                 <Label className="font-inter">Email</Label>
                 <Input
                   placeholder="Enter your email"
@@ -179,16 +186,9 @@ export default function AuthPage() {
                   className="w-full rounded border "
                 />
               </div>
-              {/* 👇 hCaptcha here */}
-              {/* <HCaptcha
-                sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY!}
-                onVerify={(captchaToken) => setToken(captchaToken)}
-                ref={captchaRef}
-                // size="invisible"
-                //  size="compact"
-              /> */}
+               */}
 
-              <Button
+              {/* <Button
                 className="rounded border font-sora cursor-pointer bg-black"
                 disabled={loading}
                 onClick={HandleAuth}
@@ -204,9 +204,9 @@ export default function AuthPage() {
                     <LuChevronRight />
                   </>
                 )}
-              </Button>
+              </Button> */}
 
-              <p className="font-inter text-sm font-light">
+              {/* <p className="font-inter text-sm font-light py-10">
                 {isSignup
                   ? "Already have an account?"
                   : "Don't have an account?"}{" "}
@@ -215,6 +215,17 @@ export default function AuthPage() {
                   onClick={() => setIsSignup(!isSignup)}
                 >
                   {isSignup ? "Sign In" : "Sign Up"}
+                </span>
+              </p> */}
+
+              <p
+                onClick={() => router.push("/auth-mentor")}
+                className="text-base font-medium py-10 text-center"
+              >
+                {" "}
+                Are you a Mentor ?{" "}
+                <span className="text-blue-500 cursor-pointer">
+                  Click here!
                 </span>
               </p>
             </div>
@@ -240,14 +251,14 @@ export default function AuthPage() {
       `,
             }}
           />
-         
+
           <div className="absolute top-[16%] left-1/2 -translate-x-1/2 -translate-y-1/2">
             <AnimatedGradientTextDemo />
           </div>
           <div className="absolute inset-0 ">
             <Image
               src="/clarioWhite.png"
-              alt="Clarioo"
+              alt="Clario"
               width={100}
               height={100}
               className="absolute top-[32%] left-1/2 -translate-x-1/2 -translate-y-1/2"

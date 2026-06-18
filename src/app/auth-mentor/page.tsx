@@ -95,7 +95,7 @@ export default function AuthPage() {
           <div className="absolute inset-0 ">
             <Image
               src="/clarioWhite.png"
-              alt="Clarioo"
+              alt="Clario"
               width={100}
               height={100}
               className="absolute top-[28%] left-1/2 -translate-x-1/2 -translate-y-1/2"
@@ -127,7 +127,7 @@ export default function AuthPage() {
                   className=""
                 />
 
-                <h1 className="font-raleway text-3xl font-bold">Clarioo</h1>
+                <h1 className="font-raleway text-3xl font-bold">Clario</h1>
               </div>
             </Link>
 

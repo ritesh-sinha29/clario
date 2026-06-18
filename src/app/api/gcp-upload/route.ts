@@ -3,14 +3,15 @@ import { Storage } from "@google-cloud/storage";
 import { promises as fs } from "fs";
 import path from "path";
 
+const storage = new Storage({
+  projectId: process.env.GCP_PROJECT_ID,
+  credentials: JSON.parse(process.env.GCP_SERVICE_ACCOUNT_KEY!),
+});
+
+const BUCKET = process.env.GCP_BUCKET_ASSETS!;
 
 export async function GET() {
   try {
-    const storage = new Storage({
-      projectId: process.env.GCP_PROJECT_ID,
-      credentials: JSON.parse(process.env.GCP_SERVICE_ACCOUNT_KEY!),
-    });
-    const BUCKET = process.env.GCP_BUCKET_ASSETS!;
     const bucket = storage.bucket(BUCKET);
 
     const images = [

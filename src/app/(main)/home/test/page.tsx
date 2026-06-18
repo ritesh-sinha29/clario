@@ -13,14 +13,8 @@ interface Job {
 // Server-side data fetching
 async function getJobs(): Promise<Job[]> {
   try {
-
-
-    if (!process.env.SERPAPI_KEY) {
-      console.warn("SERPAPI_KEY is not set, skipping job fetch");
-      return [];
-    }
     const response = await getJson({
-      api_key: process.env.SERPAPI_KEY,
+      // api_key: process.env.SERPAPI_KEY, 
       engine: "google_jobs",
       google_domain: "google.co.in",
       q: "gen ai dev",

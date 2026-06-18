@@ -9,7 +9,7 @@ import {
   MentorProfile,
   College,
 } from "../types/allTypes";
-import { redis } from "@/lib/redis";
+// import { redis } from "@/lib/redis";
 import { useNotificationStore } from "../store/NotificationStore";
 
 // Interface for the response structure
@@ -54,23 +54,23 @@ export async function getMatchingMentors(
 ): Promise<DBMentor[]> {
   const supabase = createClient();
 
-  const focus = userMainFocus.toLowerCase().trim();
-  const cacheKey = `mentors:${focus}`;
+  // const focus = userMainFocus.toLowerCase().trim();
+  // const cacheKey = `mentors:${focus}`;
 
-  const cachedMentors = await redis.get(cacheKey);
+  // const cachedMentors = await redis.get(cacheKey);
 
-  if (cachedMentors) {
-    console.log(`---- Mentors HIT from Redis for key---: ${cacheKey}`);
-    // Ensure cachedMentors is an array
-    if (Array.isArray(cachedMentors)) {
-      return cachedMentors as DBMentor[];
-    }
-    console.warn(
-      `Invalid cache data for key: ${cacheKey}, fetching from Supabase`
-    );
-  } else {
-    console.log(`Cache miss for key: ${cacheKey}, querying Supabase`);
-  }
+  // if (cachedMentors) {
+  //   console.log(`---- Mentors HIT from Redis for key---: ${cacheKey}`);
+  //   // Ensure cachedMentors is an array
+  //   if (Array.isArray(cachedMentors)) {
+  //     return cachedMentors as DBMentor[];
+  //   }
+  //   console.warn(
+  //     `Invalid cache data for key: ${cacheKey}, fetching from Supabase`
+  //   );
+  // } else {
+  //   console.log(`Cache miss for key: ${cacheKey}, querying Supabase`);
+  // }
 
   const { data, error } = await supabase
     .from("mentors")
@@ -85,10 +85,10 @@ export async function getMatchingMentors(
   }
 
   // 10-minute TTL (600 seconds)
-  if (data && data.length > 0) {
-    await redis.set(cacheKey, JSON.stringify(data), { ex: 600 });
-    console.log("Mentors fetched db, cached in redis");
-  }
+  // if (data && data.length > 0) {
+  //   await redis.set(cacheKey, JSON.stringify(data), { ex: 600 });
+  //   console.log("Mentors fetched db, cached in redis");
+  // }
 
   return data || [];
 }
@@ -202,16 +202,14 @@ export async function getRandomUsersByCareer(
 
 export async function getUserQuizData(userId: any): Promise<UserQuizData[]> {
   const supabase = createClient();
-  const cacheKey = `quizdata:${userId}`; // create a unique key based on the user ID
+  // const cacheKey = `quizdata:${userId}`;
 
   try {
-    const cached = await redis.get<UserQuizData[]>(cacheKey);
-    if (cached) {
-      console.log(`✅ Quiz data Hit in Redis for user: ${userId}`);
-      return cached;
-    }
-
-    console.log(`❌ Cache miss for user: ${userId}, querying Supabase...`);
+    // const cached = await redis.get<UserQuizData[]>(cacheKey);
+    // if (cached) {
+    //   console.log(`✅ Quiz data Hit in Redis for user: ${userId}`);
+    //   return cached;
+    // }
 
     const { data, error } = await supabase
       .from("userQuizData")
@@ -225,14 +223,13 @@ export async function getUserQuizData(userId: any): Promise<UserQuizData[]> {
 
     const quizData = (data || []) as UserQuizData[];
 
-    if (quizData.length > 0) {
-      await redis.set(cacheKey, quizData, { ex: 600 });
-      console.log(`✅ Quiz data cached in Redis for user: ${userId}`);
-    }
+    // if (quizData.length > 0) {
+    //   await redis.set(cacheKey, quizData, { ex: 600 });
+    // }
 
     return quizData;
   } catch (err) {
-    console.error(`Redis/Supabase error for user ${userId}:`, err);
+    console.error(`Supabase error for user ${userId}:`, err);
     return [];
   }
 }
@@ -249,32 +246,17 @@ export async function getUserQuizData(userId: any): Promise<UserQuizData[]> {
 
 export async function getRandomMentorVideos(): Promise<MentorVideo[]> {
   const supabase = createClient();
-  const cacheKey = `mentorVideos`;
+  // const cacheKey = `mentorVideos`;
 
-  const cachedVideos = await redis.get(cacheKey);
-
-  if (cachedVideos) {
-    console.log(`----✅ Mentor Videos HIT from Redis for key: ${cacheKey}`);
-    try {
-      let parsed: MentorVideo[];
-
-      if (typeof cachedVideos === "object" && cachedVideos !== null) {
-        parsed = cachedVideos as MentorVideo[];
-      } else if (typeof cachedVideos === "string") {
-        parsed = JSON.parse(cachedVideos) as MentorVideo[];
-      } else {
-        throw new Error("Cached data is neither an object nor a string");
-      }
-
-      if (Array.isArray(parsed)) {
-        return parsed;
-      }
-    } catch (err) {
-      console.warn(`❌ Invalid cache data for key: ${cacheKey}`, err);
-    }
-  } else {
-    console.log(`--- Cache miss for mentor videos: ${cacheKey} ---`);
-  }
+  // const cachedVideos = await redis.get(cacheKey);
+  // if (cachedVideos) {
+  //   try {
+  //     let parsed: MentorVideo[];
+  //     if (typeof cachedVideos === "object") parsed = cachedVideos as MentorVideo[];
+  //     else parsed = JSON.parse(cachedVideos);
+  //     if (Array.isArray(parsed)) return parsed;
+  //   } catch (err) {}
+  // }
 
   const { data, error } = await supabase
     .from("mentors")
@@ -286,17 +268,12 @@ export async function getRandomMentorVideos(): Promise<MentorVideo[]> {
     return [];
   }
 
-  if (!data || data.length === 0) {
-    console.warn("⚠️ No mentor videos found in DB");
-    return [];
-  }
+  if (!data || data.length === 0) return [];
 
-  // pick 6 random videos
   const shuffled = data.sort(() => 0.5 - Math.random());
   const selected = shuffled.slice(0, 6);
 
-  await redis.set(cacheKey, JSON.stringify(selected), { ex: 300 });
-  console.log("📦 Mentor videos fetched from DB and cached in Redis");
+  // await redis.set(cacheKey, JSON.stringify(selected), { ex: 300 });
 
   return selected;
 }
@@ -493,6 +470,9 @@ export async function updateSelectedCareer(
   selectedCareer: string
 ) {
   const supabase = createClient();
+  console.log("USER ID--------------->", userId)
+  console.log("Selected Carrer--------------->", selectedCareer)
+
 
   const { data, error } = await supabase
     .from("userQuizData")

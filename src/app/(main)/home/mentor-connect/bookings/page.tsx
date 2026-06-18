@@ -128,10 +128,11 @@ const Bookings = () => {
               <button
                 key={f.key}
                 onClick={() => setSelectedFilter(f.key)}
-                className={`text-left px-3 py-2 font-inter text-base capitalize bg-blue-100 rounded-md cursor-pointer hover:bg-blue-300 transition-colors ${selectedFilter === f.key
+                className={`text-left px-3 py-2 font-inter text-base capitalize bg-blue-100 rounded-md cursor-pointer hover:bg-blue-300 transition-colors ${
+                  selectedFilter === f.key
                     ? "bg-blue-400 text-white font-inter font-medium"
                     : ""
-                  }`}
+                }`}
               >
                 {f.label}
               </button>
@@ -177,14 +178,15 @@ const Bookings = () => {
                   </div>
                   <div className="ml-auto text-sm">
                     <span
-                      className={`px-2 py-1 rounded-full text-xs font-inter font-medium capitalize ${s.status === "pending"
+                      className={`px-2 py-1 rounded-full text-xs font-inter font-medium capitalize ${
+                        s.status === "pending"
                           ? "bg-yellow-600/20"
                           : s.status === "accepted"
-                            ? "bg-green-600/20"
-                            : s.status === "completed"
-                              ? "bg-blue-600/20"
-                              : "bg-red-600/20"
-                        }`}
+                          ? "bg-green-600/20"
+                          : s.status === "completed"
+                          ? "bg-blue-600/20"
+                          : "bg-red-600/20"
+                      }`}
                     >
                       {s.status}
                     </span>
