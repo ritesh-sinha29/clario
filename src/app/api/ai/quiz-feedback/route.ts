@@ -84,14 +84,23 @@ function getSchemaAndPrompt(userStatus: string, mainFocus: string) {
   throw new Error("Unsupported userStatus + mainFocus combination");
 }
 
-const llm = new ChatGroq({
-  model: "meta-llama/llama-4-scout-17b-16e-instruct",
-  temperature: 0.4,
-  maxTokens: 600,
-});
-
 export async function POST(request: Request) {
   try {
+    const apiKey = process.env.GROQ_API_KEY;
+    if (!apiKey) {
+      console.error("GROQ_API_KEY is missing");
+      return NextResponse.json(
+        { isError: true, error: "Groq is not configured" },
+        { status: 500 }
+      );
+    }
+
+    const llm = new ChatGroq({
+      apiKey,
+      model: "meta-llama/llama-4-scout-17b-16e-instruct",
+      temperature: 0.4,
+      maxTokens: 600,
+    });
     const body: QuizRequest = await request.json();
     const { quizData, userStatus, mainFocus } = body;
 

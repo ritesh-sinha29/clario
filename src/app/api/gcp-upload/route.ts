@@ -3,15 +3,24 @@ import { Storage } from "@google-cloud/storage";
 import { promises as fs } from "fs";
 import path from "path";
 
-const storage = new Storage({
-  projectId: process.env.GCP_PROJECT_ID,
-  credentials: JSON.parse(process.env.GCP_SERVICE_ACCOUNT_KEY!),
-});
-
-const BUCKET = process.env.GCP_BUCKET_ASSETS!;
+const BUCKET = process.env.GCP_BUCKET_ASSETS || "";
 
 export async function GET() {
   try {
+    const key = process.env.GCP_SERVICE_ACCOUNT_KEY;
+    if (!key) {
+      console.error("GCP_SERVICE_ACCOUNT_KEY is missing");
+      return NextResponse.json({ error: "GCP configuration error: GCP_SERVICE_ACCOUNT_KEY is missing" }, { status: 500 });
+    }
+    if (!BUCKET) {
+      console.error("GCP_BUCKET_ASSETS is missing");
+      return NextResponse.json({ error: "GCP configuration error: GCP_BUCKET_ASSETS is missing" }, { status: 500 });
+    }
+
+    const storage = new Storage({
+      projectId: process.env.GCP_PROJECT_ID,
+      credentials: JSON.parse(key),
+    });
     const bucket = storage.bucket(BUCKET);
 
     const images = [

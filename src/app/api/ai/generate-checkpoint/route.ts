@@ -54,22 +54,29 @@ Rules:
 `);
 
 // -----------------------------
-// LLM CONFIG
-// -----------------------------
-const llm = new ChatGroq({
-  model: "meta-llama/llama-4-scout-17b-16e-instruct",
-  temperature: 0.6,
-  maxTokens: 1200,
-  maxRetries: 3,
-});
-
-const chain = promptTemplate.pipe(llm).pipe(parser);
-
-// -----------------------------
 // API ROUTE
 // -----------------------------
 export async function POST(request: Request) {
   try {
+    const apiKey = process.env.GROQ_API_KEY;
+    if (!apiKey) {
+      console.error("GROQ_API_KEY is missing");
+      return NextResponse.json(
+        { isError: true, error: "Groq is not configured" },
+        { status: 500 }
+      );
+    }
+
+    const llm = new ChatGroq({
+      apiKey,
+      model: "meta-llama/llama-4-scout-17b-16e-instruct",
+      temperature: 0.6,
+      maxTokens: 1200,
+      maxRetries: 3,
+    });
+
+    const chain = promptTemplate.pipe(llm).pipe(parser);
+
     const body = await request.json();
     const { title, description } = body;
 

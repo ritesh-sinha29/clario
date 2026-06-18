@@ -1,12 +1,16 @@
 import { NextResponse } from "next/server";
 import { tavily } from "@tavily/core";
 
-const tvly = tavily({
-  apiKey: process.env.NEXT_PUBLIC_TAVILY_API_KEY!,
-});
-
 export async function POST(req: Request) {
   try {
+    const apiKey = process.env.NEXT_PUBLIC_TAVILY_API_KEY;
+    if (!apiKey) {
+      console.error("Tavily API key missing");
+      return NextResponse.json({ error: "Tavily is not configured" }, { status: 500 });
+    }
+
+    const tvly = tavily({ apiKey });
+
     const { query } = await req.json();
 
     if (!query || typeof query !== "string") {
