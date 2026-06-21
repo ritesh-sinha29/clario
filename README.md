@@ -4,7 +4,7 @@
   <h3>Your AI-Powered Career Compass 🧭</h3>
   <p>Revolutionizing career guidance with 3D roadmaps, personalized AI agents, and real-time mentorship.</p>
 
-  [**Live Demo**](https://www.clarioo.live/auth) | [**Report Bug**](https://github.com/ronitrai27/clario-career_platform/issues) | [**Request Feature**](https://github.com/ronitrai27/clario-career_platform/issues)
+  [**Live Demo**](https://www.clarioo.live/auth) | [**Report Bug**](https://github.com/ritesh-sinha29/clario/issues) | [**Request Feature**](https://github.com/ritesh-sinha29/clario/issues)
 </div>
 
 ---
@@ -66,8 +66,8 @@ Follow these instructions to set up the project locally.
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/ronitrai27/clario-career_platform.git
-   cd clario-career_platform
+   git clone https://github.com/ritesh-sinha29/clario.git
+   cd clario
    ```
 
 2. **Install dependencies**
