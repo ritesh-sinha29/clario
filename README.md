@@ -1,4 +1,4 @@
-# 🚀 Clario Career Platform
+# 🚀 Clario Career Platform !
 
 <div align="center">
   <h3>Your AI-Powered Career Compass 🧭</h3>
