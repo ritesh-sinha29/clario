@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { z } from "zod";
 import { StructuredOutputParser } from "@langchain/core/output_parsers";
-import { ChatGroq } from "@langchain/groq";
+import OpenAI from "openai";
+// import { ChatGroq } from "@langchain/groq";
 import { NextResponse } from "next/server";
 import { jsonrepair } from "jsonrepair";
 import { tavily } from "@tavily/core";
@@ -47,28 +48,71 @@ const parser = StructuredOutputParser.fromZodSchema(RoadmapSchema as any);
 
 export async function POST(req: Request) {
   try {
-    const apiKey = process.env.GROQ_API_KEY;
+    // --- Previous Groq Implementation (Commented out) ---
+    // const groqApiKey = process.env.GROQ_API_KEY;
+    // const groqModel = new ChatGroq({
+    //   apiKey: groqApiKey,
+    //   model: "llama-3.3-70b-versatile",
+    //   temperature: 0.3,
+    //   maxTokens: 1500,
+    // });
+
+    const apiKey =
+      process.env.OPENAI_API_KEY || process.env.NEXT_PUBLIC_OPENAI_API_KEY;
     if (!apiKey) {
-      console.error("GROQ_API_KEY is missing");
-      return NextResponse.json({ error: "Groq is not configured" }, { status: 500 });
+      console.error("OPENAI_API_KEY is missing");
+      return NextResponse.json(
+        { error: "OpenAI is not configured" },
+        { status: 500 }
+      );
     }
 
-    const model = new ChatGroq({
-      apiKey,
-      model: "llama-3.3-70b-versatile",
-      temperature: 0.3,
-      maxTokens: 1500,
-    });
+    const openai = new OpenAI({ apiKey });
     const body = await req.json();
     const field = body.field || "Software Developer";
     const timeline = body.timeline || "3 months";
     const mode = body.mode || "Beginner";
     const formatInstructions = parser.getFormatInstructions();
 
+    // 🔹 Tavily Real-Time Web Search for Real-Time Tech Stack Context
+    const tavilyKey =
+      process.env.NEXT_PUBLIC_TAVILY_API_KEY || process.env.TAVILY_API_KEY;
+    let tavilyContext = "";
+
+    if (tavilyKey) {
+      try {
+        const tvly = tavily({ apiKey: tavilyKey });
+        const searchRes = await tvly.search(
+          `latest current production tech stack tools libraries frameworks for ${field} in ${new Date().getFullYear()}`,
+          {
+            search_depth: "basic",
+            max_results: 3,
+          }
+        );
+
+        if (searchRes?.results?.length) {
+          tavilyContext = searchRes.results
+            .map(
+              (r: any, idx: number) =>
+                `Source ${idx + 1}: ${r.title}\n${r.content?.slice(0, 300)}`
+            )
+            .join("\n\n");
+        }
+      } catch (err) {
+        console.warn("Tavily real-time search failed:", err);
+      }
+    }
+
     const firstPrompt = `
 You are an Elite Industry Principal Architect & Senior Mentor.
 
 Task: Generate a cutting-edge learning roadmap for "${field}" (${timeline}, ${mode} level).
+
+${
+  tavilyContext
+    ? `REAL-TIME INDUSTRY CONTEXT (from Tavily Web Search):\n${tavilyContext}\n`
+    : ""
+}
 
 DIRECTIVES:
 1. ONLY include the exact current production tools, frameworks, libraries, and APIs actively used by top tech companies for "${field}" as per current year.
@@ -99,12 +143,20 @@ Return ONLY valid JSON.
 ${formatInstructions}
 `;
 
-    const firstResponse = await model.invoke(firstPrompt);
+    const firstResponse = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: firstPrompt }],
+      temperature: 0.3,
+      max_tokens: 1500,
+    });
+
+    const firstContent = firstResponse.choices[0]?.message?.content || "";
+
     let repairedJSON: string;
     try {
-      repairedJSON = jsonrepair(firstResponse.content as string);
+      repairedJSON = jsonrepair(firstContent);
     } catch {
-      repairedJSON = firstResponse.content as string;
+      repairedJSON = firstContent;
     }
 
     const secondPrompt = `
@@ -122,26 +174,34 @@ Return valid JSON only.
 ${formatInstructions}
 `;
 
-    const secondResponse = await model.invoke(secondPrompt);
+    const secondResponse = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: secondPrompt }],
+      temperature: 0.3,
+      max_tokens: 1500,
+    });
+
+    const secondContent = secondResponse.choices[0]?.message?.content || "";
 
     let secondRepairedJSON: string;
     try {
-      secondRepairedJSON = jsonrepair(secondResponse.content as string);
+      secondRepairedJSON = jsonrepair(secondContent);
     } catch (repairErr) {
       console.warn(
         "Second JSON repair failed, using raw LLM output",
         repairErr
       );
-      secondRepairedJSON = secondResponse.content as string;
+      secondRepairedJSON = secondContent;
     }
 
     const finalParsed: any = await parser.parse(secondRepairedJSON);
 
     // 🔹 Tavily Real-Time Web Search for Exact Official Documentation Links
-    const tavilyKey =
-      process.env.NEXT_PUBLIC_TAVILY_API_KEY || process.env.TAVILY_API_KEY;
-
-    if (tavilyKey && finalParsed?.initialNodes && Array.isArray(finalParsed.initialNodes)) {
+    if (
+      tavilyKey &&
+      finalParsed?.initialNodes &&
+      Array.isArray(finalParsed.initialNodes)
+    ) {
       try {
         const tvly = tavily({ apiKey: tavilyKey });
         await Promise.all(
@@ -176,3 +236,7 @@ ${formatInstructions}
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+
+
+
