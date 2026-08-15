@@ -29,8 +29,35 @@ interface RoadmapProps {
   };
 }
 
+// 🔹 Validate resource link provided by Tavily real-time search
+const getWorkingResourceLink = (title: string, link?: string): string => {
+  if (link && typeof link === "string") {
+    const trimmed = link.trim();
+    const lower = trimmed.toLowerCase();
+    if (
+      trimmed !== "" &&
+      trimmed !== "#" &&
+      !lower.includes("example.com") &&
+      !lower.includes("placeholder") &&
+      lower !== "undefined" &&
+      lower !== "null"
+    ) {
+      if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+        return trimmed;
+      }
+      if (trimmed.includes(".")) {
+        return `https://${trimmed}`;
+      }
+    }
+  }
+  // Fallback to direct search if link is missing
+  return `https://www.google.com/search?q=${encodeURIComponent(title + " official documentation tutorial")}`;
+};
+
 // 🔹 Custom Node Component matching original design
 function CustomNode({ data }: any) {
+  const resourceUrl = getWorkingResourceLink(data.title, data.link);
+
   return (
     <div className="bg-blue-50 border rounded-lg shadow-md p-3 w-64 relative hover:shadow-lg transition-all duration-200">
       <div className="absolute -top-3 -left-3 w-6 h-6 bg-blue-600 text-white text-xs rounded-full flex items-center justify-center font-bold">
@@ -44,16 +71,15 @@ function CustomNode({ data }: any) {
         {data.title}
       </h3>
       <p className="text-gray-600 font-inter text-sm mt-1">{data.description}</p>
-      {data.link && (
-        <a
-          href={data.link}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-500 text-sm underline mt-2 inline-block"
-        >
-          Resource
-        </a>
-      )}
+      
+      <a
+        href={resourceUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-500 text-sm underline mt-2 inline-block font-medium hover:text-blue-700"
+      >
+        Resource ↗
+      </a>
 
       <Handle type="source" position={Position.Bottom} className="opacity-0" />
       <Handle type="source" position={Position.Right} className="opacity-0" />

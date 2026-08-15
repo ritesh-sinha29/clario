@@ -4,8 +4,9 @@ import { StructuredOutputParser } from "@langchain/core/output_parsers";
 import { ChatGroq } from "@langchain/groq";
 import { NextResponse } from "next/server";
 import { jsonrepair } from "jsonrepair";
+import { tavily } from "@tavily/core";
 
-// schema non-strict
+// Schema non-strict
 const RoadmapSchema = z.object({
   roadmapTitle: z.string().optional(),
   description: z.string().optional(),
@@ -25,7 +26,7 @@ const RoadmapSchema = z.object({
           .object({
             title: z.string().optional(),
             description: z.string().optional(),
-            link: z.string().optional(), // any string allowed
+            link: z.string().optional(),
           })
           .optional(),
       })
@@ -56,7 +57,7 @@ export async function POST(req: Request) {
       apiKey,
       model: "llama-3.3-70b-versatile",
       temperature: 0.3,
-      maxTokens: 1000,
+      maxTokens: 1500,
     });
     const body = await req.json();
     const field = body.field || "Software Developer";
@@ -65,44 +66,40 @@ export async function POST(req: Request) {
     const formatInstructions = parser.getFormatInstructions();
 
     const firstPrompt = `
-You are an expert roadmap generator.
+You are an Elite Industry Principal Architect & Senior Mentor.
 
-Task: Create a concise learning roadmap for a "${field}".
+Task: Generate a cutting-edge learning roadmap for "${field}" (${timeline}, ${mode} level).
 
-Requirements:
-1. Roadmap must include:
-   - roadmapTitle (short title of the roadmap)
-   - description (1-2 lines summary)
-   -  duration: "${timeline}"
+DIRECTIVES:
+1. ONLY include the exact current production tools, frameworks, libraries, and APIs actively used by top tech companies for "${field}" as per current year.
+2. NO generic textbook terms. NO "Introduction to X". NO vague concepts.
+3. Each description MUST be exactly 1 short sentence (max 15 words) naming the tool and its core production use.
 
-2. initialNodes (5-8 topics):
-    - Divide topics aligned to "${mode}" difficulty
-    - Split into: Basics (2-3), Intermediate (2-3), Advanced (1-2)
-    - Each node must have:
-     • id: unique string (e.g. "node-1")
-     • type: "default"
-     • position: { x, y } → numeric values
-     • data:
-       - title: short name of the topic
-       - description: 1-2 line explanation
-       - link: a relevant reference link (e.g. free resource)
+GRID POSITIONS (3-column layout, grid index coordinates):
+• node-1: { x: 0, y: 0 }
+• node-2: { x: 1, y: 0 }
+• node-3: { x: 2, y: 0 }
+• node-4: { x: 0, y: 1 }
+• node-5: { x: 1, y: 1 }
+• node-6: { x: 2, y: 1 }
+• node-7: { x: 0, y: 2 }
 
-3. initialEdges:
-   - Each edge must connect nodes logically from Basics → Intermediate → Advanced.
-   - Each edge must have:
-     • id: unique string (e.g. "edge-1")
-     • source: source node id
-     • target: target node id
+NODE STRUCTURE:
+- id: "node-1", "node-2", etc.
+- type: "default"
+- position: grid coordinate above
+- data.title: concise tool/framework title (e.g. "LangChain & LCEL Chains")
+- data.description: exactly 1 sentence, max 15 words, naming the tool and what to build.
+- data.link: search query string (e.g. "LangGraph StateGraph agentic workflow tutorial")
 
-Additional Rules:
-- No extra commentary — only return valid JSON.
-- JSON must strictly follow the schema.
+EDGES: Connect all nodes sequentially: node-1 → node-2 → ... → node-7.
+
+Return ONLY valid JSON.
 
 ${formatInstructions}
 `;
 
     const firstResponse = await model.invoke(firstPrompt);
-    // Try to repair raw JSON from first LLM
     let repairedJSON: string;
     try {
       repairedJSON = jsonrepair(firstResponse.content as string);
@@ -110,44 +107,23 @@ ${formatInstructions}
       repairedJSON = firstResponse.content as string;
     }
 
-    // console.log("First LLM raw (possibly incomplete):", repairedJSON);
-
-    // Second LLM to check and complete if necessary
     const secondPrompt = `
-Here is the generated roadmap JSON for "${field}" for "${timeline}" in "${mode}" mode:
+Validate and fix this roadmap JSON for "${field}" (${timeline}, ${mode}):
 ${repairedJSON}
 
-Validate and repair the roadmap if needed. The JSON must satisfy ALL these conditions:
+Fix if any of these are wrong:
+1. roadmapTitle, description (1-2 lines), duration "${timeline}".
+2. 6-7 nodes with correct modern tools for "${field}". Descriptions MUST be 1 sentence max 15 words.
+3. Grid positions: node-1:{x:0,y:0}, node-2:{x:1,y:0}, node-3:{x:2,y:0}, node-4:{x:0,y:1}, node-5:{x:1,y:1}, node-6:{x:2,y:1}, node-7:{x:0,y:2}.
+4. Sequential edges: node-1→node-2→...→node-7.
 
-1. Has a meaningful roadmapTitle, description, and duration.
-2. initialNodes:
-   - topics aligned to "${mode}" difficulty
-   - Contains 5-8 topics (2-3 basics, 2-3 intermediate, 1-2 advanced).
-   - Each node must have:
-     • id (unique string)
-     • type ("default")
-     • position with numeric x, y
-     • data containing:
-       - title (short topic name)
-       - description (1-2 lines explanation)
-       - link (learning resource)
-3. initialEdges:
-   - All nodes are connected in a clear logical sequence (basics → intermediate → advanced).
-   - Each edge has id, source, and target matching valid node ids.
-4. Content is concise, useful, and relevant to the "${field}" roadmap.
-
-Rules:
-- If the JSON already satisfies all requirements, return it unchanged.
-- If anything is missing, incomplete, or poorly structured, correct it while keeping the original intent.
-- Do NOT add extra commentary or text outside of JSON.
-- Output must be valid JSON only, strictly following the schema.
+Return valid JSON only.
 
 ${formatInstructions}
 `;
 
     const secondResponse = await model.invoke(secondPrompt);
 
-    // Repair second JSON before parsing
     let secondRepairedJSON: string;
     try {
       secondRepairedJSON = jsonrepair(secondResponse.content as string);
@@ -156,13 +132,43 @@ ${formatInstructions}
         "Second JSON repair failed, using raw LLM output",
         repairErr
       );
-      secondRepairedJSON = secondResponse.content as string; // fallback
+      secondRepairedJSON = secondResponse.content as string;
     }
 
-    // Parse second response
-    const finalParsed = await parser.parse(secondRepairedJSON);
+    const finalParsed: any = await parser.parse(secondRepairedJSON);
 
-    // console.log("Final Parsed Roadmap from second LLM:", finalParsed);
+    // 🔹 Tavily Real-Time Web Search for Exact Official Documentation Links
+    const tavilyKey =
+      process.env.NEXT_PUBLIC_TAVILY_API_KEY || process.env.TAVILY_API_KEY;
+
+    if (tavilyKey && finalParsed?.initialNodes && Array.isArray(finalParsed.initialNodes)) {
+      try {
+        const tvly = tavily({ apiKey: tavilyKey });
+        await Promise.all(
+          finalParsed.initialNodes.map(async (node: any) => {
+            const topic = node.data?.title || field;
+            try {
+              const searchRes = await tvly.search(
+                `${topic} official documentation tutorial`,
+                {
+                  search_depth: "basic",
+                  max_results: 1,
+                }
+              );
+
+              if (searchRes?.results?.[0]?.url) {
+                if (!node.data) node.data = {};
+                node.data.link = searchRes.results[0].url;
+              }
+            } catch (err) {
+              console.warn("Tavily search failed for topic:", topic, err);
+            }
+          })
+        );
+      } catch (err) {
+        console.error("Tavily initialization failed:", err);
+      }
+    }
 
     return NextResponse.json(finalParsed);
   } catch (error: any) {
