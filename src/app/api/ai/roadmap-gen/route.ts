@@ -74,7 +74,7 @@ export async function POST(req: Request) {
     const mode = body.mode || "Beginner";
     const formatInstructions = parser.getFormatInstructions();
 
-    // 🔹 Tavily Real-Time Web Search for Real-Time Tech Stack Context
+    // 🔹 Tavily Real-Time Web Search for Industry Context Across Any Field
     const tavilyKey =
       process.env.NEXT_PUBLIC_TAVILY_API_KEY || process.env.TAVILY_API_KEY;
     let tavilyContext = "";
@@ -83,10 +83,10 @@ export async function POST(req: Request) {
       try {
         const tvly = tavily({ apiKey: tavilyKey });
         const searchRes = await tvly.search(
-          `latest current production tech stack tools libraries frameworks for ${field} in ${new Date().getFullYear()}`,
+          `latest industry standards tools platforms practices for ${field} ${new Date().getFullYear()}`,
           {
             search_depth: "basic",
-            max_results: 3,
+            max_results: 5,
           }
         );
 
@@ -94,7 +94,7 @@ export async function POST(req: Request) {
           tavilyContext = searchRes.results
             .map(
               (r: any, idx: number) =>
-                `Source ${idx + 1}: ${r.title}\n${r.content?.slice(0, 300)}`
+                `Source ${idx + 1}: ${r.title}\n${r.content?.slice(0, 350)}`
             )
             .join("\n\n");
         }
@@ -104,22 +104,27 @@ export async function POST(req: Request) {
     }
 
     const firstPrompt = `
-You are an Elite Industry Principal Architect & Senior Mentor.
+You are an Industry Leader, Domain Expert & Senior Principal Mentor.
 
-Task: Generate a cutting-edge learning roadmap for "${field}" (${timeline}, ${mode} level).
+Task: Generate an up-to-date, industry-level learning roadmap for "${field}" (${timeline}, ${mode} level).
 
 ${
   tavilyContext
-    ? `REAL-TIME INDUSTRY CONTEXT (from Tavily Web Search):\n${tavilyContext}\n`
+    ? `REAL-TIME UP-TO-DATE INDUSTRY CONTEXT (from Tavily Web Search):\n${tavilyContext}\n`
     : ""
 }
 
-DIRECTIVES:
-1. ONLY include the exact current production tools, frameworks, libraries, and APIs actively used by top tech companies for "${field}" as per current year.
-2. NO generic textbook terms. NO "Introduction to X". NO vague concepts.
-3. Each description MUST be exactly 1 short sentence (max 15 words) naming the tool and its core production use.
+DIRECTIVES FOR ANY FIELD (Tech, Design, Finance, Marketing, Healthcare, Business, Engineering, AI, etc.):
+1. Adapt dynamically to "${field}". Include specific current tools, software, platforms, frameworks, methodologies, or regulations used by top industry professionals in ${new Date().getFullYear()}.
+   • If Tech/AI: LangGraph StateGraph, Hybrid RAG, Vector Search, LangSmith Observability, Next.js 15, Kubernetes, etc.
+   • If Design: Figma Design Systems & Tokens, Auto-Layout, Maze User Testing, Prototyping.
+   • If Marketing/Business: GA4 Analytics, HubSpot Automation, Meta Ads Manager, AEO/SEO Strategy, Financial Modeling, etc.
+   • If Healthcare/Finance/Other: Relevant industry software, standards, tools, and real-world compliance/methodologies.
+2. ABSOLUTELY NO generic textbook terms (NO "Introduction to X", NO vague concepts). Name concrete tools, software, and practical industry techniques.
+3. Each node description MUST be exactly 1 action-oriented sentence (max 18 words) explaining the practical industry application of that tool/step.
+4. Generate exactly 7 nodes (node-1 through node-7).
 
-GRID POSITIONS (3-column layout, grid index coordinates):
+GRID POSITIONS (3-column layout index coordinates):
 • node-1: { x: 0, y: 0 }
 • node-2: { x: 1, y: 0 }
 • node-3: { x: 2, y: 0 }
@@ -132,13 +137,13 @@ NODE STRUCTURE:
 - id: "node-1", "node-2", etc.
 - type: "default"
 - position: grid coordinate above
-- data.title: concise tool/framework title (e.g. "LangChain & LCEL Chains")
-- data.description: exactly 1 sentence, max 15 words, naming the tool and what to build.
-- data.link: search query string (e.g. "LangGraph StateGraph agentic workflow tutorial")
+- data.title: Specific tool / platform / industry topic
+- data.description: Exactly 1 sentence (max 18 words) naming the tool/concept and its core industry usage.
+- data.link: search query string for learning resources (e.g. "${field} official documentation tutorial guide")
 
 EDGES: Connect all nodes sequentially: node-1 → node-2 → ... → node-7.
 
-Return ONLY valid JSON.
+Return ONLY valid JSON matching format instructions.
 
 ${formatInstructions}
 `;
@@ -147,7 +152,7 @@ ${formatInstructions}
       model: "gpt-4o-mini",
       messages: [{ role: "user", content: firstPrompt }],
       temperature: 0.3,
-      max_tokens: 1500,
+      max_tokens: 1800,
     });
 
     const firstContent = firstResponse.choices[0]?.message?.content || "";
@@ -160,14 +165,14 @@ ${formatInstructions}
     }
 
     const secondPrompt = `
-Validate and fix this roadmap JSON for "${field}" (${timeline}, ${mode}):
+Validate and refine this roadmap JSON for "${field}" (${timeline}, ${mode}):
 ${repairedJSON}
 
-Fix if any of these are wrong:
-1. roadmapTitle, description (1-2 lines), duration "${timeline}".
-2. 6-7 nodes with correct modern tools for "${field}". Descriptions MUST be 1 sentence max 15 words.
-3. Grid positions: node-1:{x:0,y:0}, node-2:{x:1,y:0}, node-3:{x:2,y:0}, node-4:{x:0,y:1}, node-5:{x:1,y:1}, node-6:{x:2,y:1}, node-7:{x:0,y:2}.
-4. Sequential edges: node-1→node-2→...→node-7.
+Verification Checklist:
+1. Validate roadmapTitle, description (1-2 lines), and duration "${timeline}".
+2. Ensure exactly 7 nodes featuring specific, modern industry tools, software, or methodologies for "${field}". Descriptions MUST be 1 sentence (max 18 words).
+3. Ensure exact grid positions: node-1:{x:0,y:0}, node-2:{x:1,y:0}, node-3:{x:2,y:0}, node-4:{x:0,y:1}, node-5:{x:1,y:1}, node-6:{x:2,y:1}, node-7:{x:0,y:2}.
+4. Ensure sequential edges connect node-1 → node-2 → ... → node-7.
 
 Return valid JSON only.
 
@@ -177,8 +182,8 @@ ${formatInstructions}
     const secondResponse = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [{ role: "user", content: secondPrompt }],
-      temperature: 0.3,
-      max_tokens: 1500,
+      temperature: 0.2,
+      max_tokens: 1800,
     });
 
     const secondContent = secondResponse.choices[0]?.message?.content || "";
@@ -207,27 +212,47 @@ ${formatInstructions}
         await Promise.all(
           finalParsed.initialNodes.map(async (node: any) => {
             const topic = node.data?.title || field;
+            if (!node.data) node.data = {};
             try {
               const searchRes = await tvly.search(
-                `${topic} official documentation tutorial`,
+                `${topic} ${field} official guide documentation tutorial`,
                 {
                   search_depth: "basic",
-                  max_results: 1,
+                  max_results: 2,
                 }
               );
 
               if (searchRes?.results?.[0]?.url) {
-                if (!node.data) node.data = {};
                 node.data.link = searchRes.results[0].url;
+              } else {
+                node.data.link = `https://www.google.com/search?q=${encodeURIComponent(
+                  topic + " " + field + " tutorial guide"
+                )}`;
               }
             } catch (err) {
               console.warn("Tavily search failed for topic:", topic, err);
+              node.data.link = `https://www.google.com/search?q=${encodeURIComponent(
+                topic + " " + field + " tutorial guide"
+              )}`;
             }
           })
         );
       } catch (err) {
         console.error("Tavily initialization failed:", err);
       }
+    } else if (
+      finalParsed?.initialNodes &&
+      Array.isArray(finalParsed.initialNodes)
+    ) {
+      finalParsed.initialNodes.forEach((node: any) => {
+        const topic = node.data?.title || field;
+        if (!node.data) node.data = {};
+        if (!node.data.link) {
+          node.data.link = `https://www.google.com/search?q=${encodeURIComponent(
+            topic + " " + field + " tutorial guide"
+          )}`;
+        }
+      });
     }
 
     return NextResponse.json(finalParsed);
