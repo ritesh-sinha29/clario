@@ -1,15 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-"use client";
-// import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
-// import { Pinecone } from "@pinecone-database/pinecone";
-import { GoogleGenAI } from "@google/genai";
-import { Type } from "@google/genai";
-import { getSelectedCareer, updateSelectedCareer } from "./dbActions";
+"use server";
+import OpenAI from "openai";
+import { tavily } from "@tavily/core";
+import { updateSelectedCareer } from "./dbActions";
 import { retrivalServer } from "./pineconeQuery";
-import { toast } from "sonner";
-// import { tavilySearching } from "./tavily";
 
-const getAI = () => new GoogleGenAI({ apiKey: (process.env.NEXT_PUBLIC_GEMINI_API_KEY || process.env.GEMINI_API_KEY)! });
+const getOpenAI = () =>
+  new OpenAI({
+    apiKey:
+      process.env.OPENAI_API_KEY ||
+      process.env.NEXT_PUBLIC_OPENAI_API_KEY ||
+      "",
+  });
 
 type AgentContext = {
   question: string;
@@ -21,38 +23,39 @@ type AgentContext = {
   stream?: string;
 };
 
-type HistoryPart =
-  | { text: string }
-  | { functionCall: any }
-  | { functionResponse: any };
-
 // ----------------------TOOLS---------------------------
-//webSearch tool----------------------------------------
-
+// webSearch tool
 export async function tavilySearch(query: string): Promise<string> {
   try {
-    const res = await fetch("/api/tavily", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok || !data.result) {
-      throw new Error(data.error || "No results from Tavily");
+    const apiKey =
+      process.env.NEXT_PUBLIC_TAVILY_API_KEY || process.env.TAVILY_API_KEY;
+    if (!apiKey) {
+      console.error("Tavily API key missing");
+      return "Tavily search is currently unavailable.";
     }
 
-    return data.result;
+    const tvly = tavily({ apiKey });
+    const res = await tvly.search(query, {
+      search_depth: "basic",
+      max_results: 3,
+    });
+
+    const results = (res.results || [])
+      .slice(0, 3)
+      .map(
+        (r: any, i: number) =>
+          `#${i + 1} ${r.title}\n${r.content?.slice(0, 300)}\nSource: ${r.url}`
+      )
+      .join("\n\n");
+
+    return `Top Results:\n${results}`.slice(0, 2000);
   } catch (error) {
     console.error("Error fetching Tavily results:", error);
     return "Tavily search failed. Please try again later.";
   }
 }
 
-
-// ==========================================================
-// Pinecone query tool----------------------------------------
+// Pinecone query tool
 async function retrival(userQuery: string): Promise<string> {
   try {
     console.log("====Pinecone query called===");
@@ -64,11 +67,10 @@ async function retrival(userQuery: string): Promise<string> {
   }
 }
 
-//  UPDATE selectedCareer tool----------------------------------------
+// UPDATE selectedCareer tool
 async function updateCareerTool(userId: any, selectedCareer: string) {
   try {
     const career = await updateSelectedCareer(userId, selectedCareer);
-    toast.success("User Career updated successfully!");
     return career;
   } catch (error) {
     console.error("Error in updateCareerTool:", error);
@@ -77,56 +79,65 @@ async function updateCareerTool(userId: any, selectedCareer: string) {
 }
 
 // ------------------------------TOOL DECLARATION----------------------------
-const tavilySearchDeclaration = {
-  name: "tavilySearch",
-  description:
-    "Search the web in real-time for up-to-date information using Tavily API. Use this when the query requires fresh accurate data/facts or external knowledge not present in Pinecone.",
-  parameters: {
-    type: Type.OBJECT,
-    properties: {
-      query: {
-        type: Type.STRING,
-        description: "The search query to look up on the web",
+const tools: OpenAI.Chat.Completions.ChatCompletionTool[] = [
+  {
+    type: "function",
+    function: {
+      name: "tavilySearch",
+      description:
+        "Search the web in real-time for up-to-date information using Tavily API. Use this when the query requires fresh accurate data/facts or external knowledge not present in Pinecone.",
+      parameters: {
+        type: "object",
+        properties: {
+          query: {
+            type: "string",
+            description: "The search query to look up on the web",
+          },
+        },
+        required: ["query"],
       },
     },
-    required: ["query"],
   },
-};
-const retrivalDeclaration = {
-  name: "retrival",
-  description:
-    "Retrieve relevant information from Pinecone vector database based on user query. Useful when additional context or knowledge is required before answering.",
-  parameters: {
-    type: Type.OBJECT,
-    properties: {
-      userQuery: {
-        type: Type.STRING,
-        description: "The user's natural language query to search in Pinecone",
+  {
+    type: "function",
+    function: {
+      name: "retrival",
+      description:
+        "Retrieve relevant information from Pinecone vector database based on user query. Useful when additional context or knowledge is required before answering.",
+      parameters: {
+        type: "object",
+        properties: {
+          userQuery: {
+            type: "string",
+            description: "The user's natural language query to search in Pinecone",
+          },
+        },
+        required: ["userQuery"],
       },
     },
-    required: ["userQuery"],
   },
-};
-
-const updateCareerDeclaration = {
-  name: "updateCareerTool",
-  description:
-    "Update the selected career of a specific user in the userQuizData table. Use this when modifying an existing record.",
-  parameters: {
-    type: Type.OBJECT,
-    properties: {
-      selectedCareer: {
-        type: Type.STRING,
-        description:
-          "The new career choice that will replace the user's previous selection.",
+  {
+    type: "function",
+    function: {
+      name: "updateCareerTool",
+      description:
+        "Update the selected career of a specific user in the userQuizData table. Use this when modifying an existing record.",
+      parameters: {
+        type: "object",
+        properties: {
+          selectedCareer: {
+            type: "string",
+            description:
+              "The new career choice that will replace the user's previous selection.",
+          },
+        },
+        required: ["selectedCareer"],
       },
     },
-    required: ["selectedCareer"],
   },
-};
+];
 
 // ---------------------------------TOOL MAPPING---------------------------
-
 type ToolMap = {
   retrival: (args: { userQuery: string }) => Promise<string>;
   tavilySearch: (args: { query: string }) => Promise<string>;
@@ -147,106 +158,90 @@ export async function runAgent(ctx: AgentContext) {
     stream,
   } = ctx;
 
-  const history: Array<{
-    role: string;
-    parts: HistoryPart[];
-  }> = [];
-
   const availableTools: ToolMap = {
     retrival: ({ userQuery }) => retrival(userQuery),
     tavilySearch: ({ query }) => tavilySearch(query),
     updateCareerTool: ({ selectedCareer }) =>
       updateCareerTool(userId, selectedCareer),
   };
-  history.push({
-    role: "user",
-    parts: [
-      {
-        text: question,
-      },
-    ],
-  });
 
-  const ai = getAI();
-  while (true) {
-    const response = await ai.models.generateContent({
-      model: "gemini-3.6-flash",
-      contents: history,
-      config: {
-        systemInstruction: `
-You are a highly professional and empathetic AI Career Coach whose sole focus is to help ${userName} in choosing right career path and update it using the tool. 
-${userName} is currently a ${user_current_status} in ${stream}. Based on their quiz results — suggested career options: ${careerOptions}, and summary: ${summary} — your goal is to update their desired career using the tools below for real time updates and information and help them make informed choices and chhose the career that they want to have.
+  const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
+    {
+      role: "system",
+      content: `You are a highly professional and empathetic AI Career Coach whose sole focus is to help ${userName} in choosing right career path and update it using the tool. 
+${userName} is currently a ${user_current_status} in ${stream}. Based on their quiz results — suggested career options: ${careerOptions}, and summary: ${summary} — your goal is to update their desired career using the tools below for real time updates and information and help them make informed choices and choose the career that they want to have.
 
-You Main goal using tool is:
+Your Main goal using tool is:
 1. Update user's career choice in the database using tools provided.
 
 For accurate and personalized guidance, you can use two knowledge tools freely:
 (a) Retrieve relevant information from Pinecone.
-(b) Search the web in real time using Tavily .
+(b) Search the web in real time using Tavily.`,
+    },
+    {
+      role: "user",
+      content: question,
+    },
+  ];
 
-`,
+  const openai = getOpenAI();
 
-        maxOutputTokens: 600,
-        tools: [
-          {
-            functionDeclarations: [
-              retrivalDeclaration,
-              tavilySearchDeclaration,
-              updateCareerDeclaration,
-            ],
-          },
-        ],
-      },
-    });
+  try {
+    while (true) {
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: messages,
+        tools: tools,
+        max_tokens: 600,
+      });
 
-    if (response.functionCalls && response.functionCalls.length > 0) {
-      // Preserve candidate content including thought signatures for model turn in history
-      const candidateContent = response.candidates?.[0]?.content;
-      if (candidateContent) {
-        history.push(candidateContent as any);
-      } else {
-        history.push({
-          role: "model",
-          parts: response.functionCalls.map((call) => ({ functionCall: call })),
-        });
-      }
+      const responseMessage = response.choices[0].message;
+      messages.push(responseMessage);
 
-      for (const call of response.functionCalls) {
-        const { name, args } = call;
-        const tool = availableTools[name as keyof ToolMap];
-        if (tool) {
-          const result = await tool(args as any);
-          console.log(`Result from ${name}:`, result);
-          history.push({
-            role: "user",
-            parts: [
-              {
-                functionResponse: {
-                  name: name,
-                  response: {
-                    result: result,
-                  },
-                },
-              },
-            ],
-          });
+      if (responseMessage.tool_calls && responseMessage.tool_calls.length > 0) {
+        for (const toolCall of responseMessage.tool_calls) {
+          if (toolCall.type === "function") {
+            const name = toolCall.function.name;
+            let args = {};
+            try {
+              args = JSON.parse(toolCall.function.arguments || "{}");
+            } catch (e) {
+              console.error("Failed to parse tool call arguments:", e);
+            }
+
+            const tool = availableTools[name as keyof ToolMap];
+            let resultStr = "";
+            if (tool) {
+              const result = await tool(args as any);
+              console.log(`Result from ${name}:`, result);
+              resultStr =
+                typeof result === "string"
+                  ? result
+                  : JSON.stringify(result ?? {});
+            }
+
+            messages.push({
+              role: "tool",
+              tool_call_id: toolCall.id,
+              content: resultStr || "Tool executed successfully",
+            });
+          }
         }
-      }
-    } else {
-      const candidateContent = response.candidates?.[0]?.content;
-      if (candidateContent) {
-        history.push(candidateContent as any);
       } else {
-        history.push({
-          role: "model",
-          parts: [
-            {
-              text: response.text ?? "",
-            },
-          ],
-        });
+        return responseMessage.content ?? "";
       }
-      return response.text ?? "";
     }
+  } catch (error: any) {
+    console.error("Error in OpenAI runAgent:", error);
+    if (
+      error?.status === 429 ||
+      String(error?.message).includes("429") ||
+      String(error?.message).includes("quota")
+    ) {
+      return "⚠️ OpenAI API rate limit or quota exceeded. Please check your plan/billing details or try again later.";
+    }
+    return `⚠️ An error occurred: ${error?.message || "Please try again."}`;
   }
 }
+
+
