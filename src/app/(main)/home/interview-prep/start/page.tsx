@@ -264,6 +264,9 @@ Key Guidelines:
 
   vapi.on("call-end", () => {
     setIsCallActive(false);
+    setIsMicOn(false);
+    setActiveUser(false);
+    stopCamera();
     setCallFinished(true);
   });
   useEffect(() => {
@@ -515,15 +518,22 @@ Key Guidelines:
           <div className="flex justify-between mb-2">
             {loading ? (
               <div className="flex gap-4">
-                <div className="w-5 h-5 bg-red-400 rounded-full animate-bounce"></div>
+                <div className="w-5 h-5 bg-amber-400 rounded-full animate-bounce"></div>
                 <p className="font-inter text-base tracking-wide">
                   Connecting...
                 </p>
               </div>
-            ) : (
+            ) : isCallActive ? (
               <div className="flex gap-4">
-                <div className="w-5 h-5 bg-green-300 rounded-full animate-bounce"></div>
+                <div className="w-5 h-5 bg-green-500 rounded-full animate-bounce"></div>
                 <p className="font-inter text-base tracking-wide">Connected</p>
+              </div>
+            ) : (
+              <div className="flex gap-4 items-center">
+                <div className="w-4 h-4 bg-red-500 rounded-full"></div>
+                <p className="font-inter text-base tracking-wide text-red-600 font-semibold">
+                  Interview Ended
+                </p>
               </div>
             )}
 
@@ -563,7 +573,7 @@ Key Guidelines:
               <div className="  bg-white border rounded-full w-16 h-16 flex items-center justify-center shrink-0 -mb-5">
                 <h1 className="font-extrabold font-inter text-2xl">AI</h1>
               </div>
-              {!loading && (
+              {!loading && isCallActive ? (
                 <div className="mt-10 flex flex-col space-y-1">
                   <AI_Voice />
                   {activeUser ? (
@@ -572,52 +582,73 @@ Key Guidelines:
                     <p className="text-center font-inter text-sm">Listening</p>
                   )}
                 </div>
+              ) : (
+                <div className="mt-10 flex flex-col space-y-1 items-center">
+                  <p className="text-center font-inter text-xs text-gray-500 font-semibold">
+                    Disconnected
+                  </p>
+                </div>
               )}
             </div>
           </div>
 
-          <div className="mt-7 flex justify-center gap-10">
-            {/*  Video Button */}
-            <Button
-              variant={isCameraOn ? "default" : "outline"}
-              onClick={toggleCamera}
-              className="font-inter text-sm shadow-md cursor-pointer"
-            >
-              {isCameraOn ? (
-                <LuVideo className="w-4 h-4 mr-2 text-white" />
-              ) : (
-                <LuVideoOff className="w-4 h-4 mr-2 text-black" />
-              )}
-              Video
-            </Button>
-            {/*  Mic Button */}
-            <Button
-              variant={isMicOn ? "default" : "outline"}
-              onClick={toggleMic}
-              className="font-inter text-sm shadow-md cursor-pointer"
-            >
-              {isMicOn ? (
-                <LuMic className="w-4 h-4 mr-2 text-white" />
-              ) : (
-                <LuMicOff className="w-4 h-4 mr-2 text-black" />
-              )}
-              Mic
-            </Button>
-            {/*  End Button */}
-            <Button
-              variant="destructive"
-              onClick={handleEnd}
-              className="font-inter text-sm shadow-md cursor-pointer"
-            >
-              <X className="w-4 h-4 mr-2" />
-              End
-            </Button>
-
-            {/* TESTING BUTTON */}
-            {/* <Button className="text-sm font-inter" onClick={testing}>
-              Test
-            </Button> */}
-          </div>
+          {isCallActive ? (
+            <div className="mt-7 flex justify-center gap-10">
+              {/*  Video Button */}
+              <Button
+                variant={isCameraOn ? "default" : "outline"}
+                onClick={toggleCamera}
+                className="font-inter text-sm shadow-md cursor-pointer"
+              >
+                {isCameraOn ? (
+                  <LuVideo className="w-4 h-4 mr-2 text-white" />
+                ) : (
+                  <LuVideoOff className="w-4 h-4 mr-2 text-black" />
+                )}
+                Video
+              </Button>
+              {/*  Mic Button */}
+              <Button
+                variant={isMicOn ? "default" : "outline"}
+                onClick={toggleMic}
+                className="font-inter text-sm shadow-md cursor-pointer"
+              >
+                {isMicOn ? (
+                  <LuMic className="w-4 h-4 mr-2 text-white" />
+                ) : (
+                  <LuMicOff className="w-4 h-4 mr-2 text-black" />
+                )}
+                Mic
+              </Button>
+              {/*  End Button */}
+              <Button
+                variant="destructive"
+                onClick={handleEnd}
+                className="font-inter text-sm shadow-md cursor-pointer"
+              >
+                <X className="w-4 h-4 mr-2" />
+                End
+              </Button>
+            </div>
+          ) : (
+            <div className="mt-7 flex justify-center gap-6">
+              <Button
+                onClick={() => setIsDialogOpen(true)}
+                className="font-inter text-sm shadow-md cursor-pointer bg-blue-600 text-white hover:bg-blue-700"
+              >
+                <LuEye className="w-4 h-4 mr-2" />
+                View Insights
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => router.push("/home/interview-prep")}
+                className="font-inter text-sm shadow-md cursor-pointer"
+              >
+                <LuChevronLeft className="w-4 h-4 mr-2" />
+                Back to Interview Prep
+              </Button>
+            </div>
+          )}
         </div>
         {/* RIGHT */}
         <div className="w-[28%] bg-gray-50 rounded-lg border p-3 flex flex-col">
