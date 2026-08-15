@@ -147,7 +147,7 @@ const InterviewStart = () => {
       await vapi.start({
         model: {
           provider: "google",
-          model: "gemini-2.5-pro",
+          model: "gemini-2.5-flash",
           messages: [
             {
               role: "system",

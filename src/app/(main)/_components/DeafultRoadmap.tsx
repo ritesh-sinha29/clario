@@ -9,7 +9,7 @@ import { LuActivity } from "react-icons/lu";
 
 interface DefaultRoadmapProps {
   setField: (val: string) => void;
-  fetchRoadmap: () => void;
+  fetchRoadmap: (customField?: string) => void;
 }
 
 const DefaultRoadmap: React.FC<DefaultRoadmapProps> = ({
@@ -23,7 +23,7 @@ const DefaultRoadmap: React.FC<DefaultRoadmapProps> = ({
   const handleClick = () => {
     if (quizData?.selectedCareer) {
       setField(quizData.selectedCareer);
-      fetchRoadmap();
+      fetchRoadmap(quizData.selectedCareer);
     }
   };
 

@@ -121,25 +121,24 @@ const RoadmapMaker = () => {
   // =====================================
 
   // Maker roadmap From AI and Insert to supabase
-  const fetchRoadmap = async () => {
-    if (!field.trim()) return;
+  const fetchRoadmap = async (customField?: string) => {
+    const targetField = typeof customField === "string" ? customField : field;
+    if (!targetField || !targetField.trim()) return;
     setRoadmapId(null);
     setLoadingRoadmap(true);
     setError(null);
     setRoadmap(null);
 
+    const selectedTimeline = timeline || "3 months";
+    const selectedMode = mode || "Beginner";
+    if (!timeline) setTimeline("3 months");
+    if (!mode) setMode("Beginner");
+
     try {
-      // const res = await axios.post("/api/ai/roadmap-gen", { field });
-      // console.log("=========Fetching roadmap for========= :", field, timeline, mode);
-      if (!timeline || !mode) {
-        toast.error("Please select timeline and mode from filters");
-        setLoadingRoadmap(false);
-        return;
-      }
       const res = await axios.post("/api/ai/roadmap-gen", {
-        field,
-        timeline,
-        mode,
+        field: targetField,
+        timeline: selectedTimeline,
+        mode: selectedMode,
       });
       const roadmapJson = res.data;
       setRoadmap(roadmapJson);
@@ -150,16 +149,20 @@ const RoadmapMaker = () => {
           {
             user_id: user?.id,
             roadmap_data: roadmapJson,
-            mode: mode,
-            timeline: timeline,
+            mode: selectedMode,
+            timeline: selectedTimeline,
           },
         ])
         .select();
 
-      if (insertError) throw insertError;
-      setRoadmapId(insertedRows?.[0]?.id);
+      if (insertError) console.error("Insert error:", insertError);
+      if (insertedRows?.[0]?.id) {
+        setRoadmapId(insertedRows[0].id);
+      }
     } catch (err: any) {
+      console.error("Roadmap generation error:", err);
       setError(err.response?.data?.error || "Something went wrong");
+      toast.error(err.response?.data?.error || "Failed to generate roadmap");
     } finally {
       setLoadingRoadmap(false);
     }
@@ -321,7 +324,10 @@ const RoadmapMaker = () => {
                   {careerSkillOptions.map((option, idx) => (
                     <div
                       key={idx}
-                      onClick={() => setField(option)}
+                      onClick={() => {
+                        setField(option);
+                        fetchRoadmap(option);
+                      }}
                       className="rounded-md w-full max-w-[260px] mx-auto shadow p-2 bg-white border border-gray-100 hover:scale-105 hover:bg-blue-100 duration-200 cursor-pointer text-center"
                     >
                       <p className="text-xs font-inter font-medium text-black tracking-tight">
@@ -406,6 +412,12 @@ const RoadmapMaker = () => {
                   rows={60}
                   value={field}
                   onChange={(e) => setField(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      fetchRoadmap();
+                    }
+                  }}
                   className={`resize-none transition-[height] duration-300 ease-in-out ${
                     openTools ? "h-[85px]" : "h-[110px]"
                   } bg-gray-50 placeholder:text-gray-400 text-black font-sora text-sm`}
@@ -424,8 +436,8 @@ const RoadmapMaker = () => {
                 <div className="absolute bottom-2 right-4">
                   <Button
                     className="flex items-center gap-2 bg-blue-100 p-2 rounded text-gray-600 hover:text-white cursor-pointer"
-                    onClick={fetchRoadmap}
-                    disabled={loading}
+                    onClick={() => fetchRoadmap()}
+                    disabled={loading || loadingRoadmap}
                   >
                     <LucideSendHorizontal size={18} className="-rotate-45" />
                   </Button>

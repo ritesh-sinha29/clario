@@ -62,7 +62,7 @@ export async function POST(request: Request) {
 
     const llm = new ChatGroq({
       apiKey,
-      model: "meta-llama/llama-4-scout-17b-16e-instruct",
+      model: "llama-3.3-70b-versatile",
       temperature: 0.3,
       maxTokens: 600,
     });

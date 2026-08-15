@@ -9,7 +9,7 @@ import { retrivalServer } from "./pineconeQuery";
 import { toast } from "sonner";
 // import { tavilySearching } from "./tavily";
 
-const ai = new GoogleGenAI({ apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY! });
+const getAI = () => new GoogleGenAI({ apiKey: (process.env.NEXT_PUBLIC_GEMINI_API_KEY || process.env.GEMINI_API_KEY)! });
 
 type AgentContext = {
   question: string;
@@ -197,10 +197,10 @@ export async function runAgent(ctx: AgentContext) {
     ],
   });
 
-  // 2.5-flash
+  const ai = getAI();
   while (true) {
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3.6-flash",
       contents: history,
       config: {
         systemInstruction: `

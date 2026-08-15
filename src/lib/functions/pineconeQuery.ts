@@ -6,7 +6,7 @@ import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
 export async function retrivalServer(userQuery: string) {
   const embeddings = new GoogleGenerativeAIEmbeddings({
     apiKey: process.env.GEMINI_API_KEY,
-    model: "text-embedding-004",
+    model: "gemini-embedding-001",
   });
 
   const queryVector = await embeddings.embedQuery(userQuery);
