@@ -2,10 +2,11 @@ import { ChatGroq } from '@langchain/groq';
 import { PromptTemplate } from '@langchain/core/prompts';
 import { Question, DifficultyLevel } from './QuizStore';
 import { searchForCareerContent, getDifficultyFocus, generateUniqueSeed } from './SearchPipeline';
+import { jsonrepair } from 'jsonrepair';
 
-const MAX_RETRIES = 2;
-const RETRY_DELAY = 500;
-const REQUEST_TIMEOUT = 15000; 
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 800;
+const REQUEST_TIMEOUT = 45000;
 
 class QuestionGenerationPipeline {
   private llm: ChatGroq;
@@ -22,9 +23,9 @@ class QuestionGenerationPipeline {
       
       this.llm = new ChatGroq({
         apiKey: apiKey,
-        model: 'llama-3.1-8b-instant', // Ultra-fast model for quiz generation
-        temperature: 0.7,
-        maxTokens: 2000, // Optimized for speed
+        model: 'llama-3.3-70b-versatile', // Current active Groq model, reliable JSON output
+        temperature: 0.5,
+        maxTokens: 2500,
       });
     } catch (error) {
       console.error('Failed to initialize Groq LLM:', error);
@@ -95,7 +96,15 @@ Career: {careerPath}
         throw new Error('No JSON array found in response');
       }
 
-      const parsed = JSON.parse(jsonMatch[0]);
+      // Use jsonrepair to fix common LLM JSON mistakes before parsing
+      let repairedJson: string;
+      try {
+        repairedJson = jsonrepair(jsonMatch[0]);
+      } catch {
+        repairedJson = jsonMatch[0];
+      }
+
+      const parsed = JSON.parse(repairedJson);
       
       if (!Array.isArray(parsed)) {
         throw new Error('Response is not an array');
