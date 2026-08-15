@@ -324,9 +324,8 @@ const CareerCoach = () => {
                       </div>
                     ) : (
                       // AI message and dollow up questions
-                      <>
+                      <React.Fragment key={idx}>
                         <div
-                          key={idx}
                           className="max-w-[75%] px-3 py-3 rounded-md text-sm font-inter tracking-normal leading-relaxed bg-blue-100 text-black flex  gap-2"
                         >
                           <BsStars
@@ -359,7 +358,7 @@ const CareerCoach = () => {
                             </div>
                           </div>
                         )}
-                      </>
+                      </React.Fragment>
                     )
                   )}
                   {aiLoading && (

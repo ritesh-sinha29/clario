@@ -26,30 +26,8 @@ type HistoryPart =
   | { functionCall: any }
   | { functionResponse: any };
 
-const history: Array<{
-  role: string;
-  parts: HistoryPart[];
-}> = [];
-
 // ----------------------TOOLS---------------------------
 //webSearch tool----------------------------------------
-
-// export async function tavilySearch(query: string): Promise<string> {
-//   try { 
-
-//     const result = await tavilySearching(query);
-
-//     if (!result || result.includes("Error")) {
-//       throw new Error("No results from Tavily");
-//     }
-
-//     return result;
-//   } catch (error) {
-//     console.error("Error fetching Tavily results:", error);
-//     return "Tavily search failed. Please try again later.";
-//   }
-// }
-
 
 export async function tavilySearch(query: string): Promise<string> {
   try {
@@ -85,17 +63,7 @@ async function retrival(userQuery: string): Promise<string> {
     return "";
   }
 }
-// GET selectedCareer Tool--------------------------------
-// async function getCareerTool(userId: any) {
-//   try {
-//     const career = await getSelectedCareer(userId);
-//     toast.success("User Career retrieved successfully!");
-//     return career;
-//   } catch (error) {
-//     console.error("Error in getCareerTool:", error);
-//     return null;
-//   }
-// }
+
 //  UPDATE selectedCareer tool----------------------------------------
 async function updateCareerTool(userId: any, selectedCareer: string) {
   try {
@@ -162,7 +130,6 @@ const updateCareerDeclaration = {
 type ToolMap = {
   retrival: (args: { userQuery: string }) => Promise<string>;
   tavilySearch: (args: { query: string }) => Promise<string>;
-  // getCareerTool: (args: { userId: any }) => Promise<string | null>;
   updateCareerTool: (args: {
     userId: any;
     selectedCareer: string;
@@ -180,11 +147,14 @@ export async function runAgent(ctx: AgentContext) {
     stream,
   } = ctx;
 
+  const history: Array<{
+    role: string;
+    parts: HistoryPart[];
+  }> = [];
+
   const availableTools: ToolMap = {
     retrival: ({ userQuery }) => retrival(userQuery),
     tavilySearch: ({ query }) => tavilySearch(query),
-
-    // getCareerTool: () => getCareerTool(userId),
     updateCareerTool: ({ selectedCareer }) =>
       updateCareerTool(userId, selectedCareer),
   };
@@ -230,46 +200,52 @@ For accurate and personalized guidance, you can use two knowledge tools freely:
     });
 
     if (response.functionCalls && response.functionCalls.length > 0) {
-      const { name, args } = response.functionCalls[0];
+      // Preserve candidate content including thought signatures for model turn in history
+      const candidateContent = response.candidates?.[0]?.content;
+      if (candidateContent) {
+        history.push(candidateContent as any);
+      } else {
+        history.push({
+          role: "model",
+          parts: response.functionCalls.map((call) => ({ functionCall: call })),
+        });
+      }
 
-      const tool = availableTools[name as keyof ToolMap];
-      const result = await tool(args as any);
-
-      const functionResponsePart = {
-        name: name,
-        response: {
-          result: result,
-        },
-      };
-
-      // model response
-      history.push({
-        role: "model",
-        parts: [
-          {
-            functionCall: response.functionCalls[0],
-          },
-        ],
-      });
-      history.push({
-        role: "user",
-        parts: [
-          {
-            functionResponse: functionResponsePart,
-          },
-        ],
-      });
-
-      console.log(`Result from ${name}:`, result);
+      for (const call of response.functionCalls) {
+        const { name, args } = call;
+        const tool = availableTools[name as keyof ToolMap];
+        if (tool) {
+          const result = await tool(args as any);
+          console.log(`Result from ${name}:`, result);
+          history.push({
+            role: "user",
+            parts: [
+              {
+                functionResponse: {
+                  name: name,
+                  response: {
+                    result: result,
+                  },
+                },
+              },
+            ],
+          });
+        }
+      }
     } else {
-      history.push({
-        role: "model",
-        parts: [
-          {
-            text: response.text ?? "",
-          },
-        ],
-      });
+      const candidateContent = response.candidates?.[0]?.content;
+      if (candidateContent) {
+        history.push(candidateContent as any);
+      } else {
+        history.push({
+          role: "model",
+          parts: [
+            {
+              text: response.text ?? "",
+            },
+          ],
+        });
+      }
       return response.text ?? "";
     }
   }

@@ -36,6 +36,7 @@ import {
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { FaceDetectionCanvas } from "../_components/FaceDetectionCanvas";
 
 const VAPI_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPI_PUBLIC_KEY;
 
@@ -112,20 +113,25 @@ const InterviewStart = () => {
 
   const toggleMic = async () => {
     if (isMicOn) {
+      try {
+        vapi.setMuted(true);
+      } catch (e) {
+        console.error("Mute error:", e);
+      }
       setIsMicOn(false);
       toast.success("Mic turned off");
     } else {
       try {
-        await navigator.mediaDevices.getUserMedia({ audio: true });
-        setIsMicOn(true);
-        toast.success("Mic turned on");
-      } catch (err) {
-        console.error("Mic access error:", err);
+        vapi.setMuted(false);
+      } catch (e) {
+        console.error("Unmute error:", e);
       }
+      setIsMicOn(true);
+      toast.success("Mic turned on");
     }
   };
  
-  // ----------------------------VAPI SETUP--------------------------------
+  // ----------------------------VAPI & CAMERA SETUP--------------------------------
   useEffect(() => {
     if (!interviewData) return;
 
@@ -133,6 +139,7 @@ const InterviewStart = () => {
       toast.error("Job title is missing for this interview.");
       return;
     }
+    startCamera();
     startCall();
   }, [interviewData]);
 
@@ -223,6 +230,12 @@ Key Guidelines:
   vapi.on("call-start", () => {
     console.log("Call has started");
     setIsCallActive(true);
+    setIsMicOn(true);
+    try {
+      vapi.setMuted(false);
+    } catch (e) {
+      console.error("Default unmute error:", e);
+    }
     setLoading(false);
     toast.info("Interview Has been started", {
       description: (
@@ -310,8 +323,14 @@ Key Guidelines:
 
   const handleEnd = () => {
     stopCamera();
-    vapi.stop();
+    try {
+      vapi.stop();
+    } catch (e) {
+      console.error("Vapi stop error:", e);
+    }
+    setIsCallActive(false);
     setIsMicOn(false);
+    setCallFinished(true);
     toast.success("Call ended");
   };
 
@@ -451,7 +470,7 @@ Key Guidelines:
   };
 
   return (
-    <div className="w-full h-screen overflow-hidden  bg-white p-4">
+    <div className="w-full min-h-screen bg-white p-4">
       <div className="flex justify-between w-full">
         <div>
           <div className="flex gap-3">
@@ -506,6 +525,8 @@ Key Guidelines:
               muted
               className="w-full h-full object-cover rounded-xl"
             />
+            {/* Real-time Multi-Face AI Guard */}
+            <FaceDetectionCanvas videoRef={videoRef} isCameraOn={isCameraOn} />
             {!isCameraOn && (
               <div>
                 <Image

@@ -58,6 +58,7 @@
     "@types/canvas-confetti": "^1.9.0",
     "@upstash/redis": "^1.35.3",
     "@vapi-ai/web": "^2.4.0",
+    "@vladmandic/face-api": "^1.7.15",
     "@xyflow/react": "^12.8.4",
     "@zegocloud/zego-uikit-prebuilt": "^2.17.0",
     "axios": "^1.11.0",
