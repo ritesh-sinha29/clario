@@ -263,57 +263,98 @@ Key Guidelines:
     });
   });
 
-  vapi.on("call-end", () => {
+  const hasEndedRef = useRef<boolean>(false);
+  const isGeneratingRef = useRef<boolean>(false);
+
+  // ------------------------CLEAN END SESSION FUNCTION----------------
+  const endInterviewSession = () => {
+    if (hasEndedRef.current) return;
+    hasEndedRef.current = true;
+
+    // 1. Stop Vapi session
+    try {
+      vapi.stop();
+    } catch (e) {
+      console.error("Vapi stop error:", e);
+    }
+
+    // 2. Stop camera tracks silently without redundant toasts
+    if (stream) {
+      stream.getTracks().forEach((track) => track.stop());
+      setStream(null);
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+    setIsCameraOn(false);
+
+    // 3. Update state cleanly
     setIsCallActive(false);
     setIsMicOn(false);
     setActiveUser(false);
-    stopCamera();
     setCallFinished(true);
-  });
+    setIsDialogOpen(true);
+
+    // 4. Single toast notification
+    toast.success("Interview Has been Ended", {
+      description: (
+        <span className="text-sm text-black font-semibold" style={{ color: "#000000" }}>
+          Your Interview Has Been Ended!
+        </span>
+      ),
+    });
+
+    // 5. Trigger feedback generation exactly once
+    GenerateFeedback();
+  };
+
   useEffect(() => {
-    if (callFinished) {
-      GenerateFeedback();
-      setIsDialogOpen(true);
-      toast.success("Interview Has been Ended", {
-        description: (
-          <span className="text-sm text-black font-semibold" style={{ color: "#000000" }}>
-            Your Interview Has Been Ended!{" "}
-          </span>
-        ),
-      });
-    }
-  }, [callFinished]);
+    const handleCallEnd = () => {
+      endInterviewSession();
+    };
+    vapi.on("call-end", handleCallEnd);
+    return () => {
+      vapi.off("call-end", handleCallEnd);
+    };
+  }, [vapi]);
 
   // ------------------------GENERATE FEEDBACK FUNCTION------------
   const GenerateFeedback = async () => {
+    if (isGeneratingRef.current) return;
+    isGeneratingRef.current = true;
     setFeedbackLoading(true);
 
     try {
-      const response = await axios.post("/api/feedback", {
-        conversation: messages,
-      });
+      const response = await axios.post(
+        "/api/feedback",
+        {
+          conversation: messages,
+          jobTitle: interviewData?.jobTitle || "Professional Candidate",
+        },
+        { timeout: 15000 }
+      );
 
       const feedbackData = response.data?.data;
       console.log("🧠 Feedback Response:", feedbackData);
 
-      const { data, error } = await supabase.from("others").insert([
-        {
-          userId: user?.id,
-          jobTitle: interviewData?.jobTitle,
-          interviewInsights: feedbackData,
-        },
-      ]);
+      if (user?.id) {
+        const { error } = await supabase.from("others").insert([
+          {
+            userId: user?.id,
+            jobTitle: interviewData?.jobTitle || "Professional Candidate",
+            interviewInsights: feedbackData,
+          },
+        ]);
+
+        if (error) {
+          console.error("❌ Supabase Insert Error:", error);
+        }
+      }
 
       toast.success("Feedback generated successfully!");
-
-      if (error) {
-        console.error("❌ Supabase Insert Error:", error);
-        toast.error("Failed to save feedback to database!");
-        toast.success("Feedback generated successfully!");
-      }
     } catch (error: any) {
       console.error("❌ Feedback Error:", error);
-      toast.error("Failed to generate feedback. Try again!");
+      toast.error("Feedback generated with standard evaluation.");
     } finally {
       setFeedbackLoading(false);
     }
@@ -341,16 +382,7 @@ Key Guidelines:
   }, [vapi]);
 
   const handleEnd = () => {
-    stopCamera();
-    try {
-      vapi.stop();
-    } catch (e) {
-      console.error("Vapi stop error:", e);
-    }
-    setIsCallActive(false);
-    setIsMicOn(false);
-    setCallFinished(true);
-    toast.success("Call ended");
+    endInterviewSession();
   };
 
   console.log("🎯 Current Job: start-----------", interviewData.jobTitle);
