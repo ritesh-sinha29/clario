@@ -1,40 +1,33 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import * as faceapi from "@vladmandic/face-api";
-import { LuShieldAlert, LuUserCheck, LuUserX } from "react-icons/lu";
+import { LuShieldAlert, LuTriangleAlert, LuUserCheck, LuUserX } from "react-icons/lu";
 import { toast } from "sonner";
 
 interface FaceDetectionCanvasProps {
   videoRef: React.RefObject<HTMLVideoElement | null>;
   isCameraOn: boolean;
+  isCallActive?: boolean;
+  onAutoEnd?: () => void;
   onFaceCountChange?: (count: number) => void;
 }
 
 export const FaceDetectionCanvas: React.FC<FaceDetectionCanvasProps> = ({
   videoRef,
   isCameraOn,
+  isCallActive = true,
+  onAutoEnd,
   onFaceCountChange,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [faceCount, setFaceCount] = useState<number>(0);
   const [isLoadingModel, setIsLoadingModel] = useState<boolean>(true);
   const [modelError, setModelError] = useState<string | null>(null);
-  const lastToastTimeRef = useRef<number>(0);
 
-  // Trigger alert toast whenever multiple faces are detected
-  useEffect(() => {
-    if (faceCount > 1) {
-      const now = Date.now();
-      if (now - lastToastTimeRef.current > 4000) {
-        lastToastTimeRef.current = now;
-        toast.error(`⚠️ Multiple Faces Detected (${faceCount})`, {
-          description:
-            "Proctoring Alert: Please ensure you are alone during the interview session.",
-          duration: 4000,
-        });
-      }
-    }
-  }, [faceCount]);
+  // Track violations: 0 = clean, 1 = warning issued, 2 = terminated
+  const [violationCount, setViolationCount] = useState<number>(0);
+  const firstViolationTimeRef = useRef<number | null>(null);
+  const isTerminatingRef = useRef<boolean>(false);
 
   // Load TinyFaceDetector model once on mount
   useEffect(() => {
@@ -63,7 +56,44 @@ export const FaceDetectionCanvas: React.FC<FaceDetectionCanvasProps> = ({
     };
   }, []);
 
-  // Throttled Detection Loop (every 300ms instead of 60fps for low bandwidth/cpu)
+  // Multi-Face Violation Enforcement Logic
+  useEffect(() => {
+    if (!isCallActive || faceCount <= 1 || isTerminatingRef.current) return;
+
+    const now = Date.now();
+
+    if (violationCount === 0) {
+      // First detection of 2nd person -> Issue Warning 1 immediately
+      setViolationCount(1);
+      firstViolationTimeRef.current = now;
+      toast.error("⚠️ PROCTORING WARNING (1/2): Multiple Faces Detected!", {
+        description:
+          "Please ensure you are alone during the interview session. A second violation will automatically terminate the interview.",
+        duration: 6000,
+      });
+    } else if (violationCount === 1) {
+      // If 2nd violation occurs (either 2nd person returned OR stayed > 3s after 1st warning)
+      const timeSinceFirstViolation = firstViolationTimeRef.current
+        ? now - firstViolationTimeRef.current
+        : 0;
+
+      if (timeSinceFirstViolation > 3000) {
+        isTerminatingRef.current = true;
+        setViolationCount(2);
+        toast.error("🚨 SECURITY VIOLATION (2/2): Multiple Faces Detected Again!", {
+          description:
+            "Interview session is being automatically ended due to proctoring security rules.",
+          duration: 6000,
+        });
+
+        if (onAutoEnd) {
+          onAutoEnd();
+        }
+      }
+    }
+  }, [faceCount, violationCount, isCallActive, onAutoEnd]);
+
+  // Fast Detection Loop (every 200ms for instant multi-face detection)
   useEffect(() => {
     if (!isCameraOn || isLoadingModel || modelError) return;
 
@@ -97,8 +127,8 @@ export const FaceDetectionCanvas: React.FC<FaceDetectionCanvasProps> = ({
             }
 
             const options = new faceapi.TinyFaceDetectorOptions({
-              inputSize: 160, // Reduced input size from 224 for faster CPU detection on slow networks
-              scoreThreshold: 0.4,
+              inputSize: 224, // Optimized resolution for fast & precise multi-face detection
+              scoreThreshold: 0.35, // Sensitive threshold for instant detection of 2nd person
             });
 
             const detections = await faceapi.detectAllFaces(video, options);
@@ -117,7 +147,7 @@ export const FaceDetectionCanvas: React.FC<FaceDetectionCanvasProps> = ({
                 detections,
                 displaySize
               );
-              resizedDetections.forEach((det) => {
+              resizedDetections.forEach((det, idx) => {
                 const { x, y, width, height } = det.box;
 
                 const isMultiple = count > 1;
@@ -129,7 +159,9 @@ export const FaceDetectionCanvas: React.FC<FaceDetectionCanvasProps> = ({
 
                 ctx.fillStyle = strokeColor;
                 const labelText = isMultiple
-                  ? "Unauthorized Person"
+                  ? idx === 0
+                    ? "Candidate"
+                    : "Unauthorized Person"
                   : "Candidate Verified";
                 ctx.font = "bold 12px sans-serif";
                 const textWidth = ctx.measureText(labelText).width;
@@ -149,7 +181,7 @@ export const FaceDetectionCanvas: React.FC<FaceDetectionCanvasProps> = ({
       }
     };
 
-    intervalId = setInterval(detect, 300);
+    intervalId = setInterval(detect, 200);
 
     return () => {
       if (intervalId) clearInterval(intervalId);
@@ -175,14 +207,25 @@ export const FaceDetectionCanvas: React.FC<FaceDetectionCanvasProps> = ({
         {faceCount > 1 && (
           <div className="bg-red-600/90 backdrop-blur text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-2 shadow-lg animate-bounce">
             <LuShieldAlert className="w-4 h-4 text-white" />
-            <span>Multiple Faces Detected ({faceCount}) - Security Warning</span>
+            <span>
+              Multiple Faces Detected ({faceCount}) - Security Warning {violationCount > 0 ? `(${violationCount}/2)` : ""}
+            </span>
           </div>
         )}
 
         {faceCount === 1 && (
           <div className="bg-emerald-600/90 backdrop-blur text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-2 shadow-md">
             <LuUserCheck className="w-4 h-4" />
-            <span>Candidate Verified (1 Face)</span>
+            <span>
+              Candidate Verified (1 Face) {violationCount === 1 ? " (1 Warning Recorded)" : ""}
+            </span>
+          </div>
+        )}
+
+        {violationCount === 1 && faceCount <= 1 && (
+          <div className="bg-amber-600/90 backdrop-blur text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-2 shadow-md">
+            <LuTriangleAlert className="w-4 h-4 text-amber-200" />
+            <span>Warning 1/2 Active - Next violation ends interview</span>
           </div>
         )}
 
@@ -203,3 +246,4 @@ export const FaceDetectionCanvas: React.FC<FaceDetectionCanvasProps> = ({
     </>
   );
 };
+

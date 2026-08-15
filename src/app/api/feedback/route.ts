@@ -73,10 +73,19 @@ export async function POST(request: Request) {
     const { conversation } = body;
 
     if (!conversation || conversation.length === 0) {
-      return NextResponse.json(
-        { isError: true, error: "Missing conversation data" },
-        { status: 400 }
-      );
+      return NextResponse.json({
+        data: {
+          feedback: {
+            rating: {
+              technicalSkills: 0,
+              communication: 0,
+              problemSolving: 0,
+              experience: 0,
+            },
+            summary: "The interview was ended before any conversation was recorded.",
+          },
+        },
+      });
     }
 
     const conversationString = conversation

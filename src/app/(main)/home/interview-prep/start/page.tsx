@@ -114,7 +114,9 @@ const InterviewStart = () => {
   const toggleMic = async () => {
     if (isMicOn) {
       try {
-        vapi.setMuted(true);
+        if (isCallActive) {
+          vapi.setMuted(true);
+        }
       } catch (e) {
         console.error("Mute error:", e);
       }
@@ -122,7 +124,9 @@ const InterviewStart = () => {
       toast.success("Mic turned off");
     } else {
       try {
-        vapi.setMuted(false);
+        if (isCallActive) {
+          vapi.setMuted(false);
+        }
       } catch (e) {
         console.error("Unmute error:", e);
       }
@@ -130,7 +134,18 @@ const InterviewStart = () => {
       toast.success("Mic turned on");
     }
   };
- 
+
+  // Register Vapi error handler to prevent unhandled EventEmitter errors
+  useEffect(() => {
+    const handleVapiError = (err: any) => {
+      console.error("Vapi background error:", err);
+    };
+    vapi.on("error", handleVapiError);
+    return () => {
+      vapi.off("error", handleVapiError);
+    };
+  }, [vapi]);
+
   // ----------------------------VAPI & CAMERA SETUP--------------------------------
   useEffect(() => {
     if (!interviewData) return;
@@ -526,7 +541,12 @@ Key Guidelines:
               className="w-full h-full object-cover rounded-xl"
             />
             {/* Real-time Multi-Face AI Guard */}
-            <FaceDetectionCanvas videoRef={videoRef} isCameraOn={isCameraOn} />
+            <FaceDetectionCanvas
+              videoRef={videoRef}
+              isCameraOn={isCameraOn}
+              isCallActive={isCallActive}
+              onAutoEnd={handleEnd}
+            />
             {!isCameraOn && (
               <div>
                 <Image
@@ -653,14 +673,14 @@ Key Guidelines:
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="p-4  rounded-md max-w-md  overflow-hidden ">
-          <h1 className="text-center font-semibold font-inter text-xl">
+          <DialogTitle className="text-center font-semibold font-inter text-xl">
             Interview Ended Successfully{" "}
             <LuActivity className="inline w-5 h-5 ml-2" />
-          </h1>
-          <p className=" mt-3 font-inter text-center text-muted-foreground">
-            Kindly wait , insights are being generated for you. Then you can
-            sefely leave this board.
-          </p>
+          </DialogTitle>
+          <DialogDescription className=" mt-3 font-inter text-center text-muted-foreground">
+            Kindly wait, insights are being generated for you. Then you can
+            safely leave this board.
+          </DialogDescription>
 
           {feedbackloading ? (
             <Button className="mt-5">

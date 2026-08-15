@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@daily-co/daily-js':
+        specifier: ^0.92.0
+        version: 0.92.0
       '@dnd-kit/core':
         specifier: ^6.3.1
         version: 6.3.1(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -150,8 +153,8 @@ importers:
         specifier: ^1.35.3
         version: 1.35.3
       '@vapi-ai/web':
-        specifier: ^2.4.0
-        version: 2.4.0
+        specifier: ^2.6.2
+        version: 2.6.2
       '@vladmandic/face-api':
         specifier: ^1.7.15
         version: 1.7.15
@@ -891,9 +894,13 @@ packages:
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
     engines: {node: '>=12'}
 
-  '@daily-co/daily-js@0.84.0':
-    resolution: {integrity: sha512-/ynXrMDDkRXhLlHxiFNf9QU5yw4ZGPr56wNARgja/Tiid71UIniundTavCNF5cMb2I1vNoMh7oEJ/q8stg/V7g==}
+  '@daily-co/daily-js@0.87.0':
+    resolution: {integrity: sha512-hWHdBDvJwDeg8unz+XG9hD7xamuFi5Jmsk89ASATKL4fdTDHplpxi4PG9aaPXzBZYYLTjuxUje1K7B5uUR+gzw==}
     engines: {node: '>=10.0.0'}
+
+  '@daily-co/daily-js@0.92.0':
+    resolution: {integrity: sha512-Lv8sUA2C+jWEDb5QUjPEXfrPUGsE87kLA2jSLqbOp8/7xBeg7uBFCGnoB8Rcl8TjONtPTIuJAMskGiYjfDs9Ww==}
+    engines: {node: '>=22.14.0'}
 
   '@date-fns/tz@1.4.1':
     resolution: {integrity: sha512-P5LUNhtbj6YfI3iJjw5EL9eUAG6OitD0W3fWQcpQjDRc/QIsL0tRNuO1PcDvPccWL1fSTXXdE1ds+l95DV/OFA==}
@@ -3099,8 +3106,8 @@ packages:
     peerDependencies:
       react: '>= 16.8.0'
 
-  '@vapi-ai/web@2.4.0':
-    resolution: {integrity: sha512-DwNQShg2aSrzE47kPaPUHLLUbmlE3StIuihwFoKilswI6t2JtE+yN/2HRqrLMeI1gS0n3cvE3gpaOiPuigMoPQ==}
+  '@vapi-ai/web@2.6.2':
+    resolution: {integrity: sha512-LicqFUw64Nha4BIikGyTwt1PIm6Xvwh9/c4MDQkRur7j6QPKvyj9cpPQhwMAafOsaItltIMvn0l9fHYUaxRkqw==}
     engines: {node: '>=18.0.0'}
 
   '@vladmandic/face-api@1.7.15':
@@ -7343,7 +7350,15 @@ snapshots:
     dependencies:
       '@jridgewell/trace-mapping': 0.3.9
 
-  '@daily-co/daily-js@0.84.0':
+  '@daily-co/daily-js@0.87.0':
+    dependencies:
+      '@babel/runtime': 7.28.3
+      '@sentry/browser': 8.55.0
+      bowser: 2.12.1
+      dequal: 2.0.3
+      events: 3.3.0
+
+  '@daily-co/daily-js@0.92.0':
     dependencies:
       '@babel/runtime': 7.28.3
       '@sentry/browser': 8.55.0
@@ -9270,9 +9285,9 @@ snapshots:
       '@use-gesture/core': 10.3.1
       react: 19.2.3
 
-  '@vapi-ai/web@2.4.0':
+  '@vapi-ai/web@2.6.2':
     dependencies:
-      '@daily-co/daily-js': 0.84.0
+      '@daily-co/daily-js': 0.87.0
       events: 3.3.0
 
   '@vladmandic/face-api@1.7.15': {}
