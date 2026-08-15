@@ -67,8 +67,11 @@ export const FaceDetectionCanvas: React.FC<FaceDetectionCanvasProps> = ({
       setViolationCount(1);
       firstViolationTimeRef.current = now;
       toast.error("⚠️ PROCTORING WARNING (1/2): Multiple Faces Detected!", {
-        description:
-          "Please ensure you are alone during the interview session. A second violation will automatically terminate the interview.",
+        description: (
+          <span className="text-black font-semibold text-xs md:text-sm block mt-1" style={{ color: "#000000" }}>
+            Please ensure you are alone during the interview session. A second violation will automatically terminate the interview.
+          </span>
+        ),
         duration: 6000,
       });
     } else if (violationCount === 1) {
@@ -81,8 +84,11 @@ export const FaceDetectionCanvas: React.FC<FaceDetectionCanvasProps> = ({
         isTerminatingRef.current = true;
         setViolationCount(2);
         toast.error("🚨 SECURITY VIOLATION (2/2): Multiple Faces Detected Again!", {
-          description:
-            "Interview session is being automatically ended due to proctoring security rules.",
+          description: (
+            <span className="text-black font-semibold text-xs md:text-sm block mt-1" style={{ color: "#000000" }}>
+              Interview session is being automatically ended due to proctoring security rules.
+            </span>
+          ),
           duration: 6000,
         });
 
@@ -147,6 +153,17 @@ export const FaceDetectionCanvas: React.FC<FaceDetectionCanvasProps> = ({
                 detections,
                 displaySize
               );
+
+              // Highlight total canvas frame in vibrant red when multiple faces detected
+              if (count > 1) {
+                ctx.strokeStyle = "#ef4444";
+                ctx.lineWidth = 10;
+                ctx.strokeRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = "rgba(239, 68, 68, 0.12)";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+              }
+
               resizedDetections.forEach((det, idx) => {
                 const { x, y, width, height } = det.box;
 
@@ -154,22 +171,22 @@ export const FaceDetectionCanvas: React.FC<FaceDetectionCanvasProps> = ({
                 const strokeColor = isMultiple ? "#ef4444" : "#22c55e";
 
                 ctx.strokeStyle = strokeColor;
-                ctx.lineWidth = 3;
+                ctx.lineWidth = 4;
                 ctx.strokeRect(x, y, width, height);
 
                 ctx.fillStyle = strokeColor;
                 const labelText = isMultiple
                   ? idx === 0
                     ? "Candidate"
-                    : "Unauthorized Person"
+                    : `Unauthorized Person #${idx}`
                   : "Candidate Verified";
-                ctx.font = "bold 12px sans-serif";
+                ctx.font = "bold 13px sans-serif";
                 const textWidth = ctx.measureText(labelText).width;
 
-                ctx.fillRect(x, Math.max(0, y - 22), textWidth + 12, 22);
+                ctx.fillRect(x, Math.max(0, y - 24), textWidth + 14, 24);
 
                 ctx.fillStyle = "#ffffff";
-                ctx.fillText(labelText, x + 6, Math.max(14, y - 6));
+                ctx.fillText(labelText, x + 7, Math.max(16, y - 7));
               });
             }
           } catch (e) {
@@ -205,7 +222,7 @@ export const FaceDetectionCanvas: React.FC<FaceDetectionCanvasProps> = ({
       {/* Real-Time Security Badge Status Overlay */}
       <div className="absolute top-3 left-3 z-20 flex flex-col gap-2">
         {faceCount > 1 && (
-          <div className="bg-red-600/90 backdrop-blur text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-2 shadow-lg animate-bounce">
+          <div className="bg-red-600/95 backdrop-blur text-white px-3.5 py-2 rounded-lg text-xs font-bold flex items-center gap-2 shadow-xl animate-bounce border border-red-400">
             <LuShieldAlert className="w-4 h-4 text-white" />
             <span>
               Multiple Faces Detected ({faceCount}) - Security Warning {violationCount > 0 ? `(${violationCount}/2)` : ""}
@@ -243,6 +260,16 @@ export const FaceDetectionCanvas: React.FC<FaceDetectionCanvasProps> = ({
           </div>
         )}
       </div>
+
+      {/* Prominent Bottom Full-Width Red Security Alert Bar */}
+      {faceCount > 1 && (
+        <div className="absolute bottom-0 inset-x-0 z-20 bg-gradient-to-r from-red-700 via-red-600 to-red-700 text-white font-bold py-2.5 px-4 text-xs md:text-sm text-center flex items-center justify-center gap-2 shadow-2xl animate-pulse border-t-2 border-red-400">
+          <LuShieldAlert className="w-5 h-5 text-white shrink-0 animate-bounce" />
+          <span>
+            🚨 SECURITY ALERT: MULTIPLE FACES DETECTED ({faceCount} FACES) — UNAUTHORIZED PERSON IN STREAM!
+          </span>
+        </div>
+      )}
     </>
   );
 };

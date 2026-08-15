@@ -65,6 +65,7 @@ const InterviewStart = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [callFinished, setCallFinished] = useState<boolean>(false);
   const [feedbackloading, setFeedbackLoading] = useState<boolean>(false);
+  const [faceCount, setFaceCount] = useState<number>(0);
   const supabase = createClient();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -254,9 +255,9 @@ Key Guidelines:
     setLoading(false);
     toast.info("Interview Has been started", {
       description: (
-        <span className="text-sm text-gray-500 font-medium">
+        <span className="text-sm text-black font-semibold" style={{ color: "#000000" }}>
           Your Interview Has Been started!{" "}
-          <span className="text-blue-600">All the best</span>
+          <span className="text-blue-600 font-bold">All the best</span>
         </span>
       ),
     });
@@ -275,7 +276,7 @@ Key Guidelines:
       setIsDialogOpen(true);
       toast.success("Interview Has been Ended", {
         description: (
-          <span className="text-sm text-gray-500 font-medium">
+          <span className="text-sm text-black font-semibold" style={{ color: "#000000" }}>
             Your Interview Has Been Ended!{" "}
           </span>
         ),
@@ -542,7 +543,13 @@ Key Guidelines:
             </p>
           </div>
           {/* VIDEO PART */}
-          <div className="flex  justify-center w-full h-[520px] border rounded-lg shadow relative overflow-hidden">
+          <div
+            className={`flex justify-center w-full h-[520px] rounded-lg shadow relative overflow-hidden transition-all duration-300 ${
+              faceCount > 1
+                ? "border-4 border-red-600 ring-4 ring-red-500/40 shadow-2xl shadow-red-500/40 bg-red-950/20 animate-pulse"
+                : "border border-gray-200"
+            }`}
+          >
             <video
               ref={videoRef}
               autoPlay
@@ -556,6 +563,7 @@ Key Guidelines:
               isCameraOn={isCameraOn}
               isCallActive={isCallActive}
               onAutoEnd={handleEnd}
+              onFaceCountChange={setFaceCount}
             />
             {!isCameraOn && (
               <div>
@@ -592,7 +600,25 @@ Key Guidelines:
             </div>
           </div>
 
-          {isCallActive ? (
+          {callFinished ? (
+            <div className="mt-7 flex justify-center gap-6">
+              <Button
+                onClick={() => setIsDialogOpen(true)}
+                className="font-inter text-sm shadow-md cursor-pointer bg-blue-600 text-white hover:bg-blue-700"
+              >
+                <LuEye className="w-4 h-4 mr-2" />
+                View Insights
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => router.push("/home/interview-prep")}
+                className="font-inter text-sm shadow-md cursor-pointer"
+              >
+                <LuChevronLeft className="w-4 h-4 mr-2" />
+                Back to Interview Prep
+              </Button>
+            </div>
+          ) : (
             <div className="mt-7 flex justify-center gap-10">
               {/*  Video Button */}
               <Button
@@ -628,24 +654,6 @@ Key Guidelines:
               >
                 <X className="w-4 h-4 mr-2" />
                 End
-              </Button>
-            </div>
-          ) : (
-            <div className="mt-7 flex justify-center gap-6">
-              <Button
-                onClick={() => setIsDialogOpen(true)}
-                className="font-inter text-sm shadow-md cursor-pointer bg-blue-600 text-white hover:bg-blue-700"
-              >
-                <LuEye className="w-4 h-4 mr-2" />
-                View Insights
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => router.push("/home/interview-prep")}
-                className="font-inter text-sm shadow-md cursor-pointer"
-              >
-                <LuChevronLeft className="w-4 h-4 mr-2" />
-                Back to Interview Prep
               </Button>
             </div>
           )}
